@@ -246,7 +246,8 @@
         entryScreen.classList.add("is-hidden");
         mainExperience.hidden = false;
         document.body.classList.remove("state-locked");
-        updateMusicHUD(false);
+        const resumed = window.soundEngine.resumePersistedBGM();
+        updateMusicHUD(resumed);
         initRainCanvas();
         observeReveals();
       }
@@ -320,6 +321,7 @@
     window.soundEngine.onTrackChange = (title) => {
       const el = $("music-track-name");
       if (el && title) el.textContent = title;
+      updateMusicHUD(window.soundEngine.isPlaying || window.soundEngine.isBattlePlaying);
     };
 
     $("music-toggle-btn").addEventListener("click", () => {
@@ -1135,6 +1137,104 @@
   }
 
   // ==========================================================================
+  // 16. FULLSCREEN RPG OVERLAY (KEEPS MAIN WEBSITE SONG PLAYING SEAMLESSLY)
+  // ==========================================================================
+  function setupRpgFrameOverlay() {
+    const modal = $("rpg-frame-modal");
+    const frame = $("rpg-frame");
+    if (!modal || !frame) return;
+
+    function pushBgmStateToFrame() {
+      if (modal.hidden || !frame.contentWindow) return;
+      try {
+        frame.contentWindow.postMessage(
+          {
+            type: "kirana-bgm-state",
+            isPlaying: window.soundEngine.isPlaying,
+            userPaused: window.soundEngine.userPaused,
+            trackTitle: window.soundEngine.currentTrackLabel,
+            volume: window.soundEngine.volume
+          },
+          "*"
+        );
+      } catch (_) {}
+    }
+
+    window.soundEngine.onStateChange = () => pushBgmStateToFrame();
+
+    function openRpgModal() {
+      window.soundEngine.stopSongPreview(true);
+      const currentAttr = frame.getAttribute("src");
+      if (!currentAttr || currentAttr === "about:blank") {
+        frame.src = "rpg.html";
+      }
+      modal.hidden = false;
+      document.body.classList.add("state-locked");
+      setTimeout(() => {
+        pushBgmStateToFrame();
+        try {
+          frame.focus();
+          if (frame.contentWindow) frame.contentWindow.focus();
+        } catch (_) {}
+      }, 80);
+    }
+
+    function closeRpgModal() {
+      if (modal.hidden) return;
+      try {
+        if (frame.contentWindow) {
+          frame.contentWindow.postMessage({ type: "kirana-rpg-hidden" }, "*");
+        }
+      } catch (_) {}
+      modal.hidden = true;
+      document.body.classList.remove("state-locked");
+      window.soundEngine.resumeAfterBattleExternal();
+      updateMusicHUD(window.soundEngine.isPlaying);
+    }
+
+    document.querySelectorAll('a[href="rpg.html"]').forEach((link) => {
+      link.addEventListener("click", (e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        e.preventDefault();
+        openRpgModal();
+      });
+    });
+
+    window.addEventListener("message", (e) => {
+      const data = e.data;
+      if (!data || typeof data !== "object") return;
+
+      if (data.type === "kirana-close-rpg") {
+        closeRpgModal();
+      } else if (data.type === "kirana-rpg-completed") {
+        markCompletionTask("rpg");
+        const statusEl = $("rpg-launch-status");
+        if (statusEl) {
+          statusEl.textContent = "STATUS: PALACE CLEARED ★";
+          statusEl.classList.add("is-cleared");
+        }
+      } else if (data.type === "kirana-bgm-control") {
+        if (data.action === "pauseForBattle") {
+          window.soundEngine.pauseForBattleExternal();
+        } else if (data.action === "resumeAfterBattle") {
+          window.soundEngine.resumeAfterBattleExternal();
+        } else if (data.action === "clearBattleFlag") {
+          window.soundEngine.clearBattleFlagExternal();
+        } else if (data.action === "togglePlay") {
+          const playing = window.soundEngine.togglePlay();
+          updateMusicHUD(playing);
+        } else if (data.action === "setVolume" && typeof data.volume !== "undefined") {
+          window.soundEngine.setVolume(data.volume);
+          const slider = $("volume-slider");
+          if (slider) slider.value = String(window.soundEngine.volume);
+        } else if (data.action === "requestState") {
+          pushBgmStateToFrame();
+        }
+      }
+    });
+  }
+
+  // ==========================================================================
   // BOOTSTRAP
   // ==========================================================================
   document.addEventListener("DOMContentLoaded", () => {
@@ -1149,5 +1249,6 @@
     setupCallingCardStamp();
     setupHermitReveal();
     setupEasterEggs();
+    setupRpgFrameOverlay();
   });
 })();

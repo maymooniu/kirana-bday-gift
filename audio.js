@@ -21,9 +21,18 @@ class SoundEngine {
     // Website 2-song playlist state
     this.websitePlaylistIdx = 0;
     this.customAudioEl = null;
+    this.pendingResumeEl = null;
     this.loopTimer = null;
     this.stepIndex = 0;
     this.noiseNode = null;
+    this._lastSaveMs = 0;
+    this.isEmbeddedChild = (() => {
+      try {
+        return Boolean(window.parent && window.parent !== window);
+      } catch (_) {
+        return false;
+      }
+    })();
 
     // RPG Battle music state (Shuffle-Bag without back-to-back repeats)
     this.battleAudioEl = null;
@@ -32,6 +41,12 @@ class SoundEngine {
     this.lastGeneralBattleUrl = null;
     this.currentTrackLabel = window.SITE_CONTENT?.audio?.trackTitle || "Velvet Rain Track 1";
     this.onTrackChange = null;
+    this.onStateChange = null;
+
+    if (!this.isEmbeddedChild) {
+      window.addEventListener("pagehide", () => this.saveBgmState(true));
+      window.addEventListener("beforeunload", () => this.saveBgmState(true));
+    }
 
     // Brief Photo Song Preview state
     this.previewAudioEl = null;
@@ -72,6 +87,104 @@ class SoundEngine {
     if (typeof this.onTrackChange === "function") {
       this.onTrackChange(title);
     }
+    this.emitStateChange();
+  }
+
+  emitStateChange() {
+    if (typeof this.onStateChange === "function") {
+      this.onStateChange({
+        isPlaying: this.isPlaying || this.isBattlePlaying,
+        userPaused: this.userPaused,
+        trackTitle: this.currentTrackLabel,
+        volume: this.volume,
+        isBattlePlaying: this.isBattlePlaying
+      });
+    }
+  }
+
+  saveBgmState(force = false) {
+    if (this.isEmbeddedChild) return;
+    const now = Date.now();
+    if (!force && now - this._lastSaveMs < 750) return;
+    this._lastSaveMs = now;
+    const payload = {
+      isPlaying: Boolean(this.isPlaying || this.bgmPausedForBattle || this.bgmPausedForPreview),
+      userPaused: Boolean(this.userPaused),
+      trackIdx: this.websitePlaylistIdx,
+      currentTime: this.customAudioEl ? Number(this.customAudioEl.currentTime) || 0 : 0,
+      volume: this.volume,
+      updatedAt: now
+    };
+    const raw = JSON.stringify(payload);
+    try {
+      sessionStorage.setItem("kirana_bgm_state_v1", raw);
+    } catch (_) {}
+    try {
+      localStorage.setItem("kirana_bgm_state_v1", raw);
+    } catch (_) {}
+  }
+
+  loadBgmState() {
+    let raw = null;
+    try {
+      raw = sessionStorage.getItem("kirana_bgm_state_v1");
+    } catch (_) {}
+    if (!raw) {
+      try {
+        raw = localStorage.getItem("kirana_bgm_state_v1");
+      } catch (_) {}
+    }
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed.updatedAt === "number" && Date.now() - parsed.updatedAt > 6 * 3600 * 1000) {
+        return null;
+      }
+      return parsed;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  resumePersistedBGM() {
+    if (this.isEmbeddedChild || this.isBattlePlaying || this.isPlaying) return false;
+    const saved = this.loadBgmState();
+    if (!saved) return false;
+    if (typeof saved.volume === "number" && !Number.isNaN(saved.volume)) {
+      this.volume = Math.max(0, Math.min(1, saved.volume));
+    }
+    this.userPaused = Boolean(saved.userPaused);
+    if (this.userPaused || !saved.isPlaying) return false;
+
+    const list = this.getWebsitePlaylist();
+    if (list.length === 0) return false;
+
+    this.websitePlaylistIdx = (Number(saved.trackIdx) || 0) % list.length;
+    const track = list[this.websitePlaylistIdx];
+    const startSec = Math.max(0, Number(saved.currentTime) || 0);
+    this.loadWebsiteTrackElement(track, 0, true, startSec);
+    return true;
+  }
+
+  attachUnlockResume(el, track) {
+    if (this.pendingResumeEl === el) return;
+    this.pendingResumeEl = el;
+    const unlock = () => {
+      if (this.pendingResumeEl !== el || this.userPaused || this.isBattlePlaying) return;
+      el.play()
+        .then(() => {
+          this.pendingResumeEl = null;
+          this.isPlaying = true;
+          this.notifyTrack(track.title);
+          this.fadeCustomVolume(el, this.volume, 600);
+          this.saveBgmState(true);
+        })
+        .catch(() => {});
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+    };
+    window.addEventListener("pointerdown", unlock, { once: true });
+    window.addEventListener("keydown", unlock, { once: true });
   }
 
   getWebsitePlaylist() {
@@ -105,7 +218,7 @@ class SoundEngine {
     this.startMellowBGM();
   }
 
-  loadWebsiteTrackElement(track, initialVol = 0, playNow = true) {
+  loadWebsiteTrackElement(track, initialVol = 0, playNow = true, startTime = 0) {
     if (this.customAudioEl) {
       if (this.customAudioEl._fadeTimer) clearInterval(this.customAudioEl._fadeTimer);
       try {
@@ -114,31 +227,59 @@ class SoundEngine {
     }
 
     const el = new Audio(encodeURI(track.url));
-    el.preload = "metadata";
+    el.preload = "auto";
     el.loop = false;
     el.volume = initialVol;
     this.customAudioEl = el;
+
+    const applyStartTime = () => {
+      if (startTime > 0 && (!el.duration || startTime < el.duration - 0.5)) {
+        try {
+          el.currentTime = startTime;
+        } catch (_) {}
+      }
+    };
+    if (startTime > 0) {
+      if (el.readyState >= 1) applyStartTime();
+      else el.addEventListener("loadedmetadata", applyStartTime, { once: true });
+    }
+
+    el.addEventListener("timeupdate", () => this.saveBgmState(false));
+
+    el.addEventListener("error", () => {
+      if (this.customAudioEl !== el) return;
+      this.customAudioEl = null;
+      this.startBuiltInFallback();
+    });
 
     el.addEventListener("ended", () => {
       const list = this.getWebsitePlaylist();
       if (list.length === 0) return;
       this.websitePlaylistIdx = (this.websitePlaylistIdx + 1) % list.length;
       const nextTrack = list[this.websitePlaylistIdx];
-      this.loadWebsiteTrackElement(nextTrack, 0, true);
+      this.loadWebsiteTrackElement(nextTrack, 0, true, 0);
     });
 
     if (playNow) {
       el.play()
         .then(() => {
+          this.pendingResumeEl = null;
           this.isPlaying = true;
           this.notifyTrack(track.title);
           if (initialVol === 0) {
-            this.fadeCustomVolume(el, this.volume, 1100);
+            this.fadeCustomVolume(el, this.volume, 850);
           }
+          this.saveBgmState(true);
         })
-        .catch(() => {
-          this.customAudioEl = null;
-          this.startBuiltInFallback();
+        .catch((err) => {
+          if (err && err.name === "NotAllowedError") {
+            this.isPlaying = false;
+            this.notifyTrack(track.title);
+            this.attachUnlockResume(el, track);
+          } else {
+            this.customAudioEl = null;
+            this.startBuiltInFallback();
+          }
         });
     }
   }
@@ -234,6 +375,8 @@ class SoundEngine {
         this.isPlaying = true;
         this.userPaused = false;
       }
+      this.saveBgmState(true);
+      this.emitStateChange();
       return this.isPlaying;
     }
 
@@ -244,7 +387,28 @@ class SoundEngine {
       this.userPaused = false;
       this.startMellowBGM();
     }
+    this.saveBgmState(true);
+    this.emitStateChange();
     return this.isPlaying;
+  }
+
+  pauseForBattleExternal() {
+    if (this.isPlaying) {
+      this.bgmPausedForBattle = true;
+      this.pauseWebsiteBGM();
+      this.emitStateChange();
+    }
+  }
+
+  resumeAfterBattleExternal() {
+    if (this.bgmPausedForBattle && !this.userPaused) {
+      this.bgmPausedForBattle = false;
+      this.startMellowBGM();
+    }
+  }
+
+  clearBattleFlagExternal() {
+    this.bgmPausedForBattle = false;
   }
 
   pauseWebsiteBGM() {
@@ -288,6 +452,8 @@ class SoundEngine {
     if (this.ctx && this.previewGain) {
       this.previewGain.gain.setTargetAtTime(Math.max(0.1, this.volume * 0.9), this.ctx.currentTime, 0.08);
     }
+    this.saveBgmState(true);
+    this.emitStateChange();
   }
 
   // ==================== RPG BATTLE MUSIC (SHUFFLE BAG + BOSS) ====================
@@ -319,9 +485,14 @@ class SoundEngine {
     this.initContext();
     this.stopBattleMusic(false);
 
-    if (this.isPlaying) {
+    if (this.isEmbeddedChild) {
+      try {
+        window.parent.postMessage({ type: "kirana-bgm-control", action: "pauseForBattle", isBoss }, "*");
+      } catch (_) {}
+    } else if (this.isPlaying) {
       this.bgmPausedForBattle = true;
       this.pauseWebsiteBGM();
+      this.saveBgmState(true);
     }
 
     if (this.userPaused) return;
@@ -361,6 +532,16 @@ class SoundEngine {
       this.battleAudioEl = null;
     }
     this.isBattlePlaying = false;
+
+    if (this.isEmbeddedChild) {
+      try {
+        window.parent.postMessage(
+          { type: "kirana-bgm-control", action: resumeWebsite ? "resumeAfterBattle" : "clearBattleFlag" },
+          "*"
+        );
+      } catch (_) {}
+      return;
+    }
 
     if (resumeWebsite && this.bgmPausedForBattle && !this.userPaused) {
       this.bgmPausedForBattle = false;

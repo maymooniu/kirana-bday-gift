@@ -399,6 +399,13 @@
       const toggleBtn = document.getElementById("music-toggle-btn");
       const badgeEl = document.getElementById("music-state-badge");
       const volSlider = document.getElementById("volume-slider");
+      const isEmbedded = (() => {
+        try {
+          return Boolean(window.parent && window.parent !== window);
+        } catch (_) {
+          return false;
+        }
+      })();
 
       function syncHud(playing) {
         if (!toggleBtn || !badgeEl) return;
@@ -417,8 +424,64 @@
         syncHud(window.soundEngine.isPlaying || window.soundEngine.isBattlePlaying);
       };
 
+      if (isEmbedded) {
+        document.querySelectorAll(".hud-back-link, .rpg-back-site-btn").forEach((link) => {
+          link.addEventListener("click", (e) => {
+            e.preventDefault();
+            try {
+              window.parent.postMessage({ type: "kirana-close-rpg" }, "*");
+            } catch (_) {}
+          });
+        });
+
+        window.addEventListener("pointerdown", () => {
+          try {
+            window.focus();
+          } catch (_) {}
+        });
+
+        window.addEventListener("message", (e) => {
+          const data = e.data;
+          if (!data || typeof data !== "object") return;
+          if (data.type === "kirana-bgm-state") {
+            window.soundEngine.userPaused = Boolean(data.userPaused);
+            if (typeof data.volume === "number") {
+              window.soundEngine.volume = data.volume;
+              if (volSlider) volSlider.value = String(data.volume);
+            }
+            if (!window.soundEngine.isBattlePlaying) {
+              const el = document.getElementById("music-track-name");
+              if (el && data.trackTitle) el.textContent = data.trackTitle;
+              syncHud(Boolean(data.isPlaying));
+            }
+          } else if (data.type === "kirana-rpg-hidden") {
+            if (window.soundEngine.isBattlePlaying) {
+              window.soundEngine.stopBattleMusic(true);
+            }
+          }
+        });
+
+        try {
+          window.parent.postMessage({ type: "kirana-bgm-control", action: "requestState" }, "*");
+        } catch (_) {}
+      } else {
+        const resumed = window.soundEngine.resumePersistedBGM();
+        if (volSlider) volSlider.value = String(window.soundEngine.volume);
+        const trEl = document.getElementById("music-track-name");
+        if (trEl && window.soundEngine.currentTrackLabel) {
+          trEl.textContent = window.soundEngine.currentTrackLabel;
+        }
+        syncHud(resumed);
+      }
+
       if (toggleBtn) {
         toggleBtn.addEventListener("click", () => {
+          if (isEmbedded && !window.soundEngine.isBattlePlaying) {
+            try {
+              window.parent.postMessage({ type: "kirana-bgm-control", action: "togglePlay" }, "*");
+            } catch (_) {}
+            return;
+          }
           const playing = window.soundEngine.togglePlay();
           syncHud(playing);
         });
@@ -426,6 +489,11 @@
       if (volSlider) {
         volSlider.addEventListener("input", (e) => {
           window.soundEngine.setVolume(e.target.value);
+          if (isEmbedded) {
+            try {
+              window.parent.postMessage({ type: "kirana-bgm-control", action: "setVolume", volume: e.target.value }, "*");
+            } catch (_) {}
+          }
         });
       }
 
@@ -434,6 +502,11 @@
         try {
           localStorage.setItem("kirana_rpg_completed_v1", "1");
         } catch (_) {}
+        if (isEmbedded) {
+          try {
+            window.parent.postMessage({ type: "kirana-rpg-completed" }, "*");
+          } catch (_) {}
+        }
       };
 
       // Confetti burst helper for Good Ending
