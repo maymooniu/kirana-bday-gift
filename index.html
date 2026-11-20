@@ -718,20 +718,85 @@
         <span id="letter-eyebrow" class="section-eyebrow">FINAL NOTE // OPEN LETTER</span>
       </div>
 
-      <article class="letter-paper">
-        <div class="letter-tape" aria-hidden="true"></div>
-        <h2 id="letter-salutation" class="letter-salutation">Dear Kirana,</h2>
-        <div id="letter-body" class="letter-body"></div>
-        <div class="letter-signoff-row">
-          <div class="letter-sticker-wrap">
-            <img id="letter-art-stamp" src="./assets/art/art-blacc-car-shiba.jpg" alt="Blacc Car and Shiba cuddle doodle" />
+      <!-- CLOSED 3D CELESTIAL ENVELOPE STAGE -->
+      <div id="letter-closed-stage" class="letter-closed-stage">
+        <button id="open-letter-btn" class="letter-envelope-btn" type="button" aria-expanded="false" aria-controls="letter-scroll-stage">
+          <div class="envelope-orbit-stars" aria-hidden="true">
+            <span class="orb-star s1">✦</span>
+            <span class="orb-star s2">✧</span>
+            <span class="orb-star s3">★</span>
+            <span class="orb-star s4">✦</span>
           </div>
-          <div class="letter-signoff">
-            <p id="letter-closing" class="letter-closing"></p>
-            <p id="letter-signature" class="letter-signature">from el goober, chris</p>
+          <div class="envelope-3d-body">
+            <div class="envelope-flap"></div>
+            <div class="envelope-liner"></div>
+            <div class="envelope-front">
+              <div class="envelope-card-header">ROYAL ARCANA IX // BIRTHDAY SEAL</div>
+              <div class="envelope-to">For Kirana</div>
+              <div class="envelope-sub">A Sealed Letter From El Goober, Chris</div>
+            </div>
+            <div class="envelope-wax-seal" aria-hidden="true">
+              <span>★</span>
+            </div>
           </div>
+          <span class="envelope-prompt">✦ Click to Break Seal &amp; Unroll Letter ✦</span>
+        </button>
+      </div>
+
+      <!-- OPENED FANCY 3D STARLIGHT SCROLL STAGE -->
+      <div id="letter-scroll-stage" class="letter-scroll-stage" hidden>
+        <div class="scroll-rod scroll-rod-top" aria-hidden="true">
+          <span class="rod-cap left"></span>
+          <span class="rod-bar"></span>
+          <span class="rod-cap right"></span>
         </div>
-      </article>
+
+        <article class="letter-paper letter-paper-fancy">
+          <div class="letter-stars-layer" aria-hidden="true">
+            <span class="l-star st-1">✦</span>
+            <span class="l-star st-2">✧</span>
+            <span class="l-star st-3">★</span>
+            <span class="l-star st-4">✦</span>
+            <span class="l-star st-5">✧</span>
+            <span class="l-star st-6">✦</span>
+          </div>
+          <div class="letter-corner tl" aria-hidden="true">✦</div>
+          <div class="letter-corner tr" aria-hidden="true">✦</div>
+          <div class="letter-corner bl" aria-hidden="true">✦</div>
+          <div class="letter-corner br" aria-hidden="true">✦</div>
+
+          <div class="letter-header-crest" aria-hidden="true">
+            <span class="crest-line"></span>
+            <span class="crest-gem">★ THE HERMIT &amp; LE SHIBA ★</span>
+            <span class="crest-line"></span>
+          </div>
+
+          <h2 id="letter-salutation" class="letter-salutation">Dear Kirana,</h2>
+          <div id="letter-body" class="letter-body"></div>
+
+          <div class="letter-signoff-row">
+            <div class="letter-sticker-wrap">
+              <img id="letter-art-stamp" src="./assets/art/art-blacc-car-shiba.jpg" alt="Blacc Car and Shiba cuddle doodle" />
+            </div>
+            <div class="letter-signoff">
+              <p id="letter-closing" class="letter-closing"></p>
+              <p id="letter-signature" class="letter-signature">from el goober, chris</p>
+            </div>
+          </div>
+        </article>
+
+        <div class="scroll-rod scroll-rod-bottom" aria-hidden="true">
+          <span class="rod-cap left"></span>
+          <span class="rod-bar"></span>
+          <span class="rod-cap right"></span>
+        </div>
+
+        <div class="letter-fold-row">
+          <button id="fold-letter-btn" class="fold-letter-btn" type="button">
+            ↺ Seal &amp; Fold Scroll Again
+          </button>
+        </div>
+      </div>
 
       <div class="footer-replay">
         <button id="rewrap-btn" class="rewrap-btn" type="button">
@@ -774,6 +839,9 @@
       <p id="egg-toast-msg" class="egg-toast-msg"></p>
     </div>
   </div>
+
+  <!-- Golden-Violet Full Website Bloom Flash for Opening the Final Letter -->
+  <div id="letter-grand-flash" class="letter-grand-flash" aria-hidden="true"></div>
 
   <!-- Fullscreen RPG Overlay (keeps main website song playing uninterrupted) -->
   <div id="rpg-frame-modal" class="rpg-frame-modal" hidden aria-label="Mini-RPG Fullscreen View">

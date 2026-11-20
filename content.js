@@ -456,7 +456,7 @@ window.SITE_CONTENT = {
     toLine: "TO: KIRANA, THE LORD OF GOOBERS",
     headline: "YOU BROUGHT THE COLOR BACK",
     body:
-      "At a time when things felt stuck in heavy static and grayscale, you showed up with quiet kindness, chaotic Blacc Car humor, and good energy. You helped clear away the gloom and painted the rain in purple and gold. As punishment for being such a great friend this year, you are hereby sentenced to a chill birthday filled with cats, sweets, choco milk, and long cozy naps.",
+      "Kirana, the Lord of Goobers and Light in the Rain. For the crime of stepping into my darkest days, refusing to leave me behind, and bringing warmth and color back into my life, you have earned my deepest gratitude. Thank you for always being there for me when I needed someone most. Therefore, I hereby issue this official challenge: ready your stylus, your choco milk, and your chaotic Blacc Car energy, because from this birthday forward, you and I are going to conquer the world together.",
     signOff: "YOUR SHIBA, CHRIS",
     designSpecNote: "DKV Print Note: Set in Velvet Purple, Crimson & Midnight Café Ink. 100% genuine appreciation, zero counterfeit vibes."
   },
@@ -519,12 +519,14 @@ window.SITE_CONTENT = {
     eyebrow: "FINAL NOTE // OPEN LETTER",
     salutation: "Dear Kirana,",
     paragraphs: [
-      "Happy Birthday, gooberiorioriorioso! I wanted to make something fun for you because you honestly deserve a solid celebration and some appreciation for everything this year.",
-      "Meeting you this year truly felt like a blessed opportunity. There was a point not long ago where I was really depressed, overwhelmed, and mentally unstable, and having you around felt like catching a breather inside a quiet rainy café. You brought laughs, silly Blacc Car and Shiba chaos, and some much needed color back into days that used to feel completely grayscale.",
-      "Whether you are grinding through DKV art projects, nerding out over Persona 5 Royal, Persona 2, Metaphor: ReFantazio, 13 Sentinels, or Tokyo Xanadu, rewatching Madoka Magica, Yuri on Ice, or Psycho-Pass, petting cats, taking another eepy eepy girl nap, or grabbing an ice cold choco milk and something sweet, I hope you know how much good energy you bring to the people around you.",
-      "Thank you for being yourself, for sticking around, and for making this year genuinely way better to look back on. Wishing you a great birthday, zero stressful deadlines, and an awesome year ahead."
+      "Thank you for coming into my life when you did. Looking back on this year, meeting you genuinely feels like one of the luckiest turns I could have asked for. At a time when my head was heavy and everything felt stuck in dull grayscale, you somehow wandered in and brought warmth, laughter, and color back into my days just by being yourself.",
+      "It is honestly hilarious remembering how awkward we were at the very start, talking to each other like we were formal royalty straight out of the Dungeons and Dragons era. Even so, I am so glad we crossed paths right before I had to endure my international debate competition in Hanoi. I was lowkey nervous about my mental health going into that trip, so being able to send you random updates and pictures of what was happening made the whole travel experience way more exciting. Just knowing I had someone safe to talk to made everything feel lighter (and please, for the love of everything, erase my eepy schizo moments from your memory).",
+      "From there, we somehow went from stiff royal greetings to late-night calls, sleep calls, and some of my favorite moments of the year. Streaming Metaphor: ReFantazio to you is easily near the top of that list. Sharing the screen and experiencing the story with you made the game ten times more fun than playing it alone, and I am genuinely looking forward to us finally finishing the rest of it together.",
+      "More than anything, thank you for opening up to me, trusting me with your stories, and letting me be vulnerable around you without ever feeling judged. I especially love the quiet moments on voice call when we are not even doing anything in particular. I saw an Instagram reel once that talked about how the most comfortable you can ever be with someone is when you are able to be comfortably bored around them and do nothing at all. Most people have this constant instinct to be performative, to impress, and to worry about saying or doing the wrong thing. With you, none of that pressure exists. I get to drop the act and just be completely myself, and I cannot thank you enough for giving me that kind of peace.",
+      "I really hope this upcoming year brings you everything you have been wishing for, endless inspiration for your art, and all the happiness you deserve. And even on the days when things feel overwhelming or less than perfect, please remember that Le Shiba is always right here in your corner, ready with bad jokes, moral support, and a lantern in the dark whenever you need it.",
+      "Happiest of birthdays to the goofiest gooberiorioriorioso blacc car."
     ],
-    closing: "Best wishes from your favorite shiba,",
+    closing: "With all the appreciation in the world,",
     signature: "from el goober, chris"
   }
 };

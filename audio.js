@@ -1108,6 +1108,55 @@ class SoundEngine {
     osc.start(now);
     osc.stop(now + 0.24);
   }
+
+  playLetterOpenSfx() {
+    this.initContext();
+    const now = this.ctx.currentTime;
+
+    // Warm, sentimental music-box & velvet harp bloom (Fmaj9 -> Cmaj9 feel)
+    const padFreqs = [174.61, 261.63, 329.63, 392.0];
+    padFreqs.forEach((f) => {
+      const osc = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = f;
+      g.gain.setValueAtTime(0.001, now);
+      g.gain.linearRampToValueAtTime(0.065, now + 0.35);
+      g.gain.exponentialRampToValueAtTime(0.0008, now + 3.2);
+      osc.connect(g);
+      g.connect(this.sfxGain);
+      osc.start(now);
+      osc.stop(now + 3.3);
+    });
+
+    const musicBoxNotes = [523.25, 659.25, 783.99, 987.77, 1174.66, 1318.51, 1567.98];
+    musicBoxNotes.forEach((f, idx) => {
+      const t = now + 0.08 + idx * 0.13;
+      const osc = this.ctx.createOscillator();
+      const harmonic = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = f;
+      harmonic.type = "triangle";
+      harmonic.frequency.value = f * 2;
+      const hg = this.ctx.createGain();
+      hg.gain.value = 0.22;
+
+      g.gain.setValueAtTime(0.001, t);
+      g.gain.linearRampToValueAtTime(0.14, t + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.0008, t + 1.65);
+
+      osc.connect(g);
+      harmonic.connect(hg);
+      hg.connect(g);
+      g.connect(this.sfxGain);
+
+      osc.start(t);
+      harmonic.start(t);
+      osc.stop(t + 1.75);
+      harmonic.stop(t + 1.75);
+    });
+  }
 }
 
 window.soundEngine = new SoundEngine();

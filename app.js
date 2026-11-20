@@ -119,9 +119,10 @@
 
     const letterBody = $("letter-body");
     letterBody.innerHTML = "";
-    C.letter.paragraphs.forEach((pText) => {
+    C.letter.paragraphs.forEach((pText, idx) => {
       const p = document.createElement("p");
       p.textContent = pText;
+      p.style.setProperty("--p-idx", String(idx));
       letterBody.appendChild(p);
     });
   }
@@ -1235,6 +1236,63 @@
   }
 
   // ==========================================================================
+  // 17. FINAL LETTER CELESTIAL ENVELOPE -> MAJESTIC SCROLL & GRAND FLASH
+  // ==========================================================================
+  function setupFinalLetter() {
+    const closedStage = $("letter-closed-stage");
+    const scrollStage = $("letter-scroll-stage");
+    const openBtn = $("open-letter-btn");
+    const foldBtn = $("fold-letter-btn");
+    const flashEl = $("letter-grand-flash");
+    if (!closedStage || !scrollStage || !openBtn) return;
+
+    function triggerGrandWebsiteFlash() {
+      document.body.classList.remove("is-letter-celebrating");
+      void document.body.offsetWidth;
+      document.body.classList.add("is-letter-celebrating");
+
+      if (flashEl) {
+        flashEl.classList.remove("is-active");
+        void flashEl.offsetWidth;
+        flashEl.classList.add("is-active");
+        setTimeout(() => flashEl.classList.remove("is-active"), 1800);
+      }
+      setTimeout(() => document.body.classList.remove("is-letter-celebrating"), 2600);
+    }
+
+    openBtn.addEventListener("click", () => {
+      openBtn.disabled = true;
+      window.soundEngine.playLetterOpenSfx();
+      triggerGrandWebsiteFlash();
+      launchBirthdayConfetti(155);
+
+      closedStage.classList.add("is-breaking");
+      setTimeout(() => {
+        closedStage.hidden = true;
+        closedStage.classList.remove("is-breaking");
+        scrollStage.hidden = false;
+        scrollStage.classList.remove("is-unrolling");
+        void scrollStage.offsetWidth;
+        scrollStage.classList.add("is-unrolling");
+        openBtn.setAttribute("aria-expanded", "true");
+        openBtn.disabled = false;
+        scrollStage.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 420);
+    });
+
+    if (foldBtn) {
+      foldBtn.addEventListener("click", () => {
+        window.soundEngine.playFlipSfx();
+        scrollStage.classList.remove("is-unrolling");
+        scrollStage.hidden = true;
+        closedStage.hidden = false;
+        openBtn.setAttribute("aria-expanded", "false");
+        closedStage.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    }
+  }
+
+  // ==========================================================================
   // BOOTSTRAP
   // ==========================================================================
   document.addEventListener("DOMContentLoaded", () => {
@@ -1250,5 +1308,6 @@
     setupHermitReveal();
     setupEasterEggs();
     setupRpgFrameOverlay();
+    setupFinalLetter();
   });
 })();
