@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Birthday, Kirana! Take Your Color</title>
+
+  <!-- Editorial DKV + Persona Display Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@600;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500;1,700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="state-locked">
+  <!-- Subtle Paper Grain & Halftone Atmosphere -->
+  <div class="grain-overlay" aria-hidden="true"></div>
+
+  <!-- Gentle White Flash Overlay for The Hermit Tarot Reveal -->
+  <div id="tarot-flash-overlay" class="tarot-flash-overlay" aria-hidden="true"></div>
+
+  <!-- Persona 5 Phantom Thief Slash Transition Overlay -->
+  <div id="slash-transition" class="slash-transition" aria-hidden="true">
+    <div class="slash-panel slash-black-1"></div>
+    <div class="slash-panel slash-white-1"></div>
+    <div class="slash-panel slash-purple"></div>
+    <div class="slash-panel slash-crimson"></div>
+    <div class="slash-star-burst">
+      <svg viewBox="0 0 120 120" class="burst-star-svg">
+        <polygon
+          points="60,4 74,42 114,42 82,66 94,106 60,82 26,106 38,66 6,42 46,42"
+          fill="#FFFDF7"
+          stroke="#111015"
+          stroke-width="4"
+        />
+      </svg>
+      <span class="slash-callout">COLORS UNLOCKED!</span>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       ACT I: MONOCHROME-TO-COLOR ENTRY SCREEN ("THE WRAPPED GIFT")
+       ===================================================================== -->
+  <section id="entry-screen" class="entry-screen" aria-label="Birthday Gift Entry">
+    <canvas id="mist-canvas" class="mist-canvas" aria-hidden="true"></canvas>
+
+    <!-- DKV Registration Corner Marks -->
+    <div class="reg-mark reg-tl" aria-hidden="true">+</div>
+    <div class="reg-mark reg-tr" aria-hidden="true">+</div>
+    <div class="reg-mark reg-bl" aria-hidden="true">+</div>
+    <div class="reg-mark reg-br" aria-hidden="true">+</div>
+
+    <div class="entry-inner">
+      <p id="entry-eyebrow" class="entry-eyebrow">MEMORY ARCHIVE // MONOCHROME</p>
+      <h1 id="entry-quote" class="entry-quote">
+        .
+      </h1>
+      <p id="entry-subquote" class="entry-subquote">
+        Then you walked in, and brought all the color back.
+      </p>
+
+      <button
+        id="unwrap-btn"
+        class="unwrap-btn"
+        type="button"
+        aria-label="Click Me to unwrap your birthday gift"
+      >
+        <span class="envelope-glow" aria-hidden="true"></span>
+
+        <!-- Glowing Velvet Butterfly + Sealed Gift Envelope SVG -->
+        <span class="envelope-wrap">
+          <svg class="butterfly-icon" viewBox="0 0 64 48" aria-hidden="true">
+            <path
+              d="M32 24 C20 6, 4 10, 8 24 C11 33, 24 31, 32 26 C40 31, 53 33, 56 24 C60 10, 44 6, 32 24 Z"
+              fill="currentColor"
+              opacity="0.9"
+            />
+            <path
+              d="M32 26 C24 31, 14 38, 18 44 C23 47, 29 38, 32 30 C35 38, 41 47, 46 44 C50 38, 40 31, 32 26 Z"
+              fill="currentColor"
+              opacity="0.72"
+            />
+            <line x1="32" y1="14" x2="32" y2="34" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
+          </svg>
+
+          <svg class="envelope-svg" viewBox="0 0 180 120" aria-hidden="true">
+            <rect x="6" y="14" width="168" height="96" rx="6" fill="#1e1e22" stroke="#d8d8de" stroke-width="2.5" />
+            <polyline points="8,16 90,72 172,16" fill="none" stroke="#d8d8de" stroke-width="2.5" />
+            <line x1="8" y1="108" x2="64" y2="56" stroke="#8a8a94" stroke-width="1.5" />
+            <line x1="172" y1="108" x2="116" y2="56" stroke="#8a8a94" stroke-width="1.5" />
+            <circle cx="90" cy="68" r="17" fill="#e6e6ec" stroke="#111015" stroke-width="2.5" />
+            <polygon points="90,56 93,64 102,64 95,69 98,78 90,73 82,78 85,69 78,64 87,64" fill="#18181c" />
+          </svg>
+        </span>
+
+        <span id="unwrap-label" class="unwrap-label">Click Me</span>
+      </button>
+
+      <p id="entry-hint" class="entry-hint">Sound on recommended, tap to unwrap your gift</p>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       MAIN DARK PURPLE RAINY CAFE PERSONA 5 x DKV EXPERIENCE
+       ===================================================================== -->
+  <main id="main-experience" class="main-experience" hidden>
+    <canvas id="rain-canvas" class="rain-canvas" aria-hidden="true"></canvas>
+    <canvas id="confetti-canvas" class="confetti-canvas" aria-hidden="true"></canvas>
+
+    <!-- Floating Persona 5 HUD + Madoka Soul Gem + Palace Map -->
+    <header class="p5-hud" aria-label="Birthday HUD">
+      <div class="hud-left">
+        <button id="music-toggle-btn" class="hud-pill hud-music-btn" type="button" title="Play or Pause Music">
+          <span class="eq-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span id="music-track-name" class="track-name">Beneath the Mask (Rainy Mood)</span>
+          <span id="music-state-badge" class="music-badge">PLAYING</span>
+        </button>
+
+        <div class="hud-pill hud-volume-wrap" title="Volume">
+          <span class="vol-label">VOL</span>
+          <input id="volume-slider" type="range" min="0" max="1" step="0.05" value="0.45" aria-label="Music volume" />
+        </div>
+
+        <!-- Madoka Magica Soul Gem Secret Tracker -->
+        <div id="egg-counter-pill" class="hud-pill hud-egg-counter" title="Find hidden doodles to purify your Soul Gem!">
+          <svg id="hud-soul-gem" class="soul-gem-svg level-0" viewBox="0 0 28 34" aria-hidden="true">
+            <ellipse cx="14" cy="17" rx="9" ry="12" fill="currentColor" stroke="#E9C46A" stroke-width="2" />
+            <polygon points="14,7 19,17 14,27 9,17" fill="#FFFDF7" opacity="0.55" />
+            <circle cx="14" cy="5" r="2.2" fill="#E9C46A" />
+            <circle cx="14" cy="29" r="2.2" fill="#E9C46A" />
+          </svg>
+          <span id="egg-counter-text">0 / 6 SOUL GEM</span>
+        </div>
+
+        <!-- Palace Map & Completion Tracker Trigger -->
+        <button id="map-toggle-btn" class="hud-pill hud-map-btn" type="button" aria-expanded="false">
+          <span>PALACE MAP</span>
+          <span id="map-progress-badge" class="map-progress-badge">0 / 6</span>
+        </button>
+      </div>
+
+      <!-- P5 Calendar Date Badge -->
+      <div class="p5-calendar-badge" aria-label="Special Date Badge">
+        <div class="cal-top">
+          <span id="cal-date" class="cal-date">11 / 20</span>
+          <span id="cal-day" class="cal-day">BIRTHDAY</span>
+        </div>
+        <div id="cal-weather" class="cal-weather">☂ Rainy Café Night</div>
+      </div>
+    </header>
+
+    <!-- Collapsible Palace Map & 100% Completion Drawer -->
+    <aside id="palace-map-drawer" class="palace-map-drawer" hidden aria-label="Palace Navigation and Progress">
+      <div class="palace-map-inner">
+        <div class="map-col">
+          <div class="map-col-title">FAST TRAVEL // SECTIONS</div>
+          <nav class="map-links">
+            <a href="#scrapbook-section" class="map-jump-link">01. Photos &amp; Songs</a>
+            <a href="#art-gallery-section" class="map-jump-link">02. Sketchbook &amp; Doodle Pad</a>
+            <a href="#rpg-section" class="map-jump-link">03. Mini-RPG Campaign</a>
+            <a href="#palette-section" class="map-jump-link">04. Pantone Palette</a>
+            <a href="#confidant-section" class="map-jump-link">05. Confidant: Chris le Shiba</a>
+            <a href="#calling-card-section" class="map-jump-link">06. Calling Card</a>
+            <a href="#hermit-section" class="map-jump-link">07. The Hermit Tarot</a>
+            <a href="#letter-section" class="map-jump-link">08. Final Letter</a>
+          </nav>
+        </div>
+
+        <div class="map-col">
+          <div class="map-col-title">PHANTOM ARTIST CHECKLIST</div>
+          <ul id="completion-checklist" class="completion-checklist">
+            <li data-task="cake"><span class="chk-box">☐</span> Blew Out Birthday Candles</li>
+            <li data-task="photos"><span class="chk-box">☐</span> Checked Polaroids &amp; Chorus</li>
+            <li data-task="rpg"><span class="chk-box">☐</span> Cleared Mini-RPG Campaign</li>
+            <li data-task="palette"><span class="chk-box">☐</span> Flipped All 6 Pantone Swatches</li>
+            <li data-task="confidant"><span class="chk-box">☐</span> Maxed Confidant Bond</li>
+            <li data-task="hermit"><span class="chk-box">☐</span> Revealed The Hermit Tarot</li>
+          </ul>
+          <div id="completion-100-banner" class="completion-100-banner" hidden>
+            ★ 100% COMPLETE! Official Rank S Phantom Artist &amp; Supreme Lord of Goobers! ★
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===================================================================
+         ACT II: HERO & LEBLANC SWEET FUEL STATION
+         =================================================================== -->
+    <section class="hero-section reveal-block">
+      <!-- Hidden Easter Egg #1: Persona 5 Star -->
+      <button
+        class="easter-egg egg-pos-hero"
+        data-egg-id="egg-star"
+        type="button"
+        aria-label="Hidden Persona Star"
+        title="Click me!"
+      >
+        <svg viewBox="0 0 40 40">
+          <polygon
+            points="20,2 25,14 38,14 27,22 31,36 20,28 9,36 13,22 2,14 15,14"
+            fill="#C77DFF"
+            stroke="#111015"
+            stroke-width="2.5"
+          />
+        </svg>
+      </button>
+
+      <div class="hero-grid">
+        <div class="hero-copy-col">
+          <div id="hero-kicker" class="p5-skew-tag">RAINY CAFÉ EDITION // FOR THE BLACC CAR</div>
+
+          <h1 class="hero-title">
+            <span id="hero-top" class="hero-top-line">HAPPY BIRTHDAY,</span>
+            <span id="hero-name" class="hero-name-cutout">KIRANA!</span>
+          </h1>
+
+          <p id="hero-subtitle" class="hero-subtitle"></p>
+
+          <div id="hero-tags" class="hero-tags"></div>
+
+          <div class="hero-actions">
+            <a href="#rpg-section" class="p5-action-btn">
+              <span>Play Mini RPG</span>
+              <span class="btn-arrow">⚔</span>
+            </a>
+            <a href="#scrapbook-section" class="p5-action-btn p5-action-secondary">
+              <span>Photos &amp; Songs</span>
+              <span class="btn-arrow">♪</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Sweet Fuel Station -->
+        <aside class="sweet-station-card" aria-label="Leblanc Late Night Menu">
+          <div class="dkv-crop-label">CAFÉ MENU // +HP/SP</div>
+          <h2 id="sweet-title" class="sweet-title">Leblanc Late Night Menu</h2>
+          <p id="sweet-subtitle" class="sweet-subtitle">Cozy rainy night treats. Tap to restore HP &amp; SP!</p>
+
+          <div id="sweet-items" class="sweet-items"></div>
+
+          <div id="sweet-toast" class="sweet-toast" aria-live="polite">
+            Pick a rainy night treat above for a birthday buff!
+          </div>
+
+          <!-- Interactive Birthday Cake Candles ("Make a Wish") -->
+          <div class="wish-cake-box">
+            <div class="wish-cake-visual" id="wish-cake-visual" aria-hidden="true">
+              <div class="cake-candles" id="cake-candles">
+                <span class="candle"><i class="flame"></i></span>
+                <span class="candle"><i class="flame"></i></span>
+                <span class="candle"><i class="flame"></i></span>
+              </div>
+              <div class="cake-tier-top"></div>
+              <div class="cake-tier-base"></div>
+            </div>
+            <div class="wish-cake-actions">
+              <button id="blow-candles-btn" class="wish-btn" type="button">
+                Make a Wish &amp; Blow Out Candles
+              </button>
+              <span id="wish-status" class="wish-status">3 glowing candles waiting!</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         ACT III: BLACC CAR SCRAPBOOK (6 PHOTOS + BRIEF SONG PREVIEWS)
+         =================================================================== -->
+    <section id="scrapbook-section" class="section-wrap reveal-block">
+      <div class="section-header">
+        <span id="scrapbook-eyebrow" class="section-eyebrow">SECTION 01 // BLACC CAR ARCHIVES</span>
+        <h2 id="scrapbook-title" class="section-title">Certified Goober Sightings</h2>
+        <p id="scrapbook-subtitle" class="section-desc"></p>
+      </div>
+
+      <div id="polaroid-grid" class="polaroid-grid"></div>
+
+      <!-- Gooberiorioriorioso + Tokyo Xanadu Soul Device Dossier Card -->
+      <div class="dossier-card">
+        <div class="dossier-head">
+          <div class="dossier-art-thumb">
+            <img id="dossier-art-img" src="./assets/art/art-blacc-car-shiba.jpg" alt="Blacc Car and Shiba drawing by Kirana" />
+          </div>
+          <div>
+            <span id="dossier-badge" class="dossier-badge">CLASSIFIED // BLACC CAR ID &amp; SOUL DEVICE</span>
+            <h3 id="dossier-title" class="dossier-title">Gooberiorioriorioso: The Lord of Goobers</h3>
+          </div>
+        </div>
+
+        <p id="dossier-intro" class="dossier-intro"></p>
+
+        <!-- Tokyo Xanadu Soul Device Readout -->
+        <div class="soul-device-panel">
+          <div id="soul-device-name" class="soul-device-name">Soul Device: Hermit's Lantern &amp; DKV Stylus</div>
+          <div id="soul-device-stats" class="soul-device-stats"></div>
+        </div>
+
+        <button id="reveal-title-btn" class="reveal-title-btn" type="button">
+          Reveal Official Sacred Title
+        </button>
+
+        <div id="sacred-title-box" class="sacred-title-box" hidden>
+          <p id="sacred-title-text" class="sacred-title-text"></p>
+          <p id="sacred-after-note" class="sacred-after-note"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         KIRAELIN'S ART GALLERY (HER 5 ARTWORKS!)
+         =================================================================== -->
+    <section id="art-gallery-section" class="section-wrap reveal-block">
+      <div class="section-header">
+        <span id="art-eyebrow" class="section-eyebrow">ART EXHIBITION // BY KIRAELIN</span>
+        <h2 id="art-title" class="section-title">The Blacc Car Sketchbook</h2>
+        <p id="art-subtitle" class="section-desc"></p>
+      </div>
+
+      <div id="art-gallery-grid" class="art-gallery-grid"></div>
+
+      <!-- Interactive DKV "Purple Café Coaster" Sketchpad -->
+      <div class="coaster-pad-card">
+        <div class="coaster-pad-head">
+          <div>
+            <span class="coaster-badge">DKV MINI STUDIO // CAFE COASTER PAD</span>
+            <h3 class="coaster-title">Draw on a Rainy Café Coaster</h3>
+            <p class="coaster-sub">Pick a pen color or stamp cute stars &amp; cat paws, then save your doodle!</p>
+          </div>
+          <div class="coaster-tools">
+            <button class="pen-swatch is-active" data-color="#c77dff" style="background:#c77dff" type="button" title="Kirana Purple"></button>
+            <button class="pen-swatch" data-color="#e9c46a" style="background:#e9c46a" type="button" title="Cafe Gold"></button>
+            <button class="pen-swatch" data-color="#f4eefb" style="background:#f4eefb" type="button" title="Cream Chalk"></button>
+            <button class="pen-swatch" data-color="#e63946" style="background:#e63946" type="button" title="Phantom Crimson"></button>
+            <button id="pen-mode-star" class="tool-chip" type="button" title="Stamp Stars">★ Stamp</button>
+            <button id="pen-mode-paw" class="tool-chip" type="button" title="Stamp Kitty Paws">🐾 Paw</button>
+            <button id="coaster-clear-btn" class="tool-chip" type="button">Clear</button>
+            <button id="coaster-save-btn" class="tool-chip tool-save" type="button">Save .PNG</button>
+          </div>
+        </div>
+        <div class="coaster-canvas-wrap">
+          <canvas id="coaster-canvas" width="680" height="300"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         ACT IV: FULL MINI-JRPG ("CHRONICLES OF THE PURPLE CAFE")
+         =================================================================== -->
+    <section id="rpg-section" class="section-wrap reveal-block">
+      <div class="section-header">
+        <span id="rpg-eyebrow" class="section-eyebrow">SECTION 02 // MINI-JRPG CAMPAIGN</span>
+        <h2 id="rpg-title" class="section-title">Chronicles of the Purple Café</h2>
+        <p id="rpg-subtitle" class="section-desc"></p>
+      </div>
+
+      <div id="rpg-arena-box" class="rpg-arena" tabindex="0">
+        <!-- Top RPG Campaign Status Bar -->
+        <div class="rpg-top-status">
+          <div class="rpg-top-left">
+            <span id="rpg-zone-name" class="rpg-chapter-pill">Zone 1: Café Leblanc Safe Room</span>
+            <span id="rpg-top-hp" class="rpg-hp-pill">HP 145/145 | SP 65/65</span>
+          </div>
+          <div class="rpg-top-right">
+            <span id="rpg-level-pill" class="rpg-level-pill">LV. 1 | 35 COINS</span>
+            <button id="rpg-menu-btn" class="rpg-menu-btn" type="button">MENU (M)</button>
+          </div>
+        </div>
+
+        <!-- 1 MORE! Banner -->
+        <div id="rpg-one-more" class="rpg-one-more" hidden>1 MORE!</div>
+
+        <!-- MODE 1: 2D EXPLORATION MAP VIEW -->
+        <div id="rpg-explore-view" class="rpg-explore-view">
+          <div id="explore-quest-pill" class="explore-quest-pill">
+            Quest: Explore Café Leblanc, talk to Morgana &amp; Chris, then head right!
+          </div>
+
+          <div class="explore-canvas-wrap">
+            <canvas id="rpg-explore-canvas" width="640" height="400" tabindex="0"></canvas>
+          </div>
+
+          <div class="explore-bottom-bar">
+            <div id="explore-notice-bar" class="explore-notice-bar">
+              Walk with WASD / Arrow keys, click tiles, or use the pad! Talk to Chris le Shiba &amp; Morgana, then head right!
+            </div>
+
+            <div class="dpad-cluster" aria-label="Touch Controls">
+              <div class="dpad-grid">
+                <span></span>
+                <button id="dpad-up" class="dpad-btn" type="button" aria-label="Move Up">▲</button>
+                <span></span>
+                <button id="dpad-left" class="dpad-btn" type="button" aria-label="Move Left">◀</button>
+                <button id="dpad-down" class="dpad-btn" type="button" aria-label="Move Down">▼</button>
+                <button id="dpad-right" class="dpad-btn" type="button" aria-label="Move Right">▶</button>
+              </div>
+              <button id="dpad-act" class="dpad-act-btn" type="button">ACT / TALK</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODE 2: ANIMATED 60FPS BATTLE VIEW -->
+        <div id="rpg-battle-view" hidden>
+          <div class="battle-canvas-wrap">
+            <canvas id="rpg-battle-canvas" width="640" height="300"></canvas>
+          </div>
+
+          <div id="rpg-telegraph-alert" class="rpg-telegraph-alert" hidden>
+            ⚠ WARNING: ENEMY IS CHARGING A HEAVY ATTACK! USE GUARD OR SOUL SHIELD!
+          </div>
+
+          <div class="rpg-battlefield">
+            <!-- Enemy Info -->
+            <div id="rpg-boss-card" class="rpg-unit-card rpg-boss-card">
+              <div class="unit-top-row">
+                <div>
+                  <span class="unit-tag boss-tag">SHADOW FOE</span>
+                  <h3 id="rpg-boss-name" class="unit-name">The Monochrome Gloom</h3>
+                  <p id="rpg-boss-sub" class="unit-sub">Shadow of Grayscale</p>
+                </div>
+                <div id="rpg-boss-weakness" class="weakness-pill">WEAK: ??? (Scan!)</div>
+              </div>
+              <div class="bar-wrap">
+                <div class="bar-label-row">
+                  <span>ENEMY HP</span>
+                  <span id="boss-hp-text">185 / 185</span>
+                </div>
+                <div class="bar-track">
+                  <div id="boss-hp-fill" class="bar-fill boss-hp-fill" style="width: 100%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Party Side -->
+            <div class="rpg-unit-card rpg-party-card">
+              <div class="party-header">
+                <img id="rpg-player-avatar" class="party-avatar" src="./assets/art/art-kirana-self.jpg" alt="Kirana Self Portrait RPG Avatar" />
+                <div class="party-title-col">
+                  <span class="unit-tag party-tag">ARCANA IX: THE HERMIT</span>
+                  <h3 id="rpg-player-name" class="unit-name">Kirana (Blacc Car)</h3>
+                  <p class="unit-sub">Allies: Chris le Shiba &amp; Morgana</p>
+                </div>
+              </div>
+
+              <div class="bar-wrap">
+                <div class="bar-label-row">
+                  <span>HP</span>
+                  <span id="player-hp-text">145 / 145</span>
+                </div>
+                <div class="bar-track">
+                  <div id="player-hp-fill" class="bar-fill player-hp-fill" style="width: 100%"></div>
+                </div>
+              </div>
+
+              <div class="bar-wrap">
+                <div class="bar-label-row">
+                  <span>SP</span>
+                  <span id="player-sp-text">65 / 65</span>
+                </div>
+                <div class="bar-track">
+                  <div id="player-sp-fill" class="bar-fill player-sp-fill" style="width: 100%"></div>
+                </div>
+              </div>
+
+              <div class="bar-wrap">
+                <div class="bar-label-row">
+                  <span>X-DRIVE / SOUL GEM</span>
+                  <span id="xdrive-text">25%</span>
+                </div>
+                <div class="bar-track">
+                  <div id="xdrive-fill" class="bar-fill xdrive-fill" style="width: 25%"></div>
+                </div>
+              </div>
+
+              <div id="rpg-status-pills" class="rpg-status-pills"></div>
+            </div>
+          </div>
+
+          <div id="rpg-log" class="rpg-log" aria-live="polite">
+            Battle start! Choose your action.
+          </div>
+
+          <div id="rpg-actions" class="rpg-actions">
+            <button id="act-strike" class="rpg-btn rpg-btn-purple" type="button">
+              <strong>Stylus Strike</strong>
+              <span>0 SP Attack (+X-Drive)</span>
+            </button>
+
+            <button id="act-skills" class="rpg-btn rpg-btn-gold" type="button">
+              <strong>Skills</strong>
+              <span>Purple / Purify / Unlocked</span>
+            </button>
+
+            <button id="act-guard" class="rpg-btn rpg-btn-sky" type="button">
+              <strong>Guard</strong>
+              <span>-72% Dmg &amp; +15 SP</span>
+            </button>
+
+            <button id="act-shiba" class="rpg-btn rpg-btn-pink" type="button">
+              <strong>Shiba Baton Pass</strong>
+              <span>Baton Pass + DEF Down</span>
+            </button>
+
+            <button id="act-scan" class="rpg-btn rpg-btn-sky" type="button">
+              <strong>Sibyl Scan</strong>
+              <span>Free Weakness Intel</span>
+            </button>
+
+            <button id="act-items" class="rpg-btn rpg-btn-choco" type="button">
+              <strong>Bag / Sweets</strong>
+              <span>Choco Milk &amp; Buffs</span>
+            </button>
+
+            <button id="act-xdrive" class="rpg-btn rpg-btn-crimson" type="button" disabled>
+              <strong>X-Drive Finisher</strong>
+              <span>Needs 100% Gauge</span>
+            </button>
+
+            <button id="act-flee" class="rpg-btn rpg-btn-ghost" type="button">
+              <strong>Escape</strong>
+              <span>Run from normal mob</span>
+            </button>
+          </div>
+
+          <div id="rpg-subdrawer" class="rpg-subdrawer" hidden>
+            <div class="subdrawer-head">
+              <span id="subdrawer-title">Choose Option</span>
+              <button id="subdrawer-close" class="subdrawer-close" type="button">✕</button>
+            </div>
+            <div id="subdrawer-options" class="subdrawer-options"></div>
+          </div>
+        </div>
+
+        <!-- MODE 3: GOOD ENDING -->
+        <div id="rpg-good-ending-view" class="rpg-ending-view" hidden>
+          <div class="rpg-all-out">
+            <div class="all-out-portrait">
+              <img id="rpg-all-out-img" src="./assets/art/art-kirana-self.jpg" alt="Kirana All Out Attack" />
+            </div>
+            <div class="all-out-text">
+              <span class="all-out-kicker">GOOD ENDING // PALACE CLEARED!</span>
+              <h3 id="rpg-victory-title" class="all-out-title"></h3>
+            </div>
+          </div>
+
+          <div id="rpg-ending-summary" class="rpg-victory-loot">
+            <div class="loot-badge">TRUE BIRTHDAY ENDING UNLOCKED</div>
+            <h3 id="loot-title" class="loot-title"></h3>
+            <p id="loot-desc" class="loot-desc"></p>
+            <div class="ending-stats-grid">
+              <div class="end-stat-box">
+                <small>FINAL RANK</small>
+                <strong id="end-stat-level">Lv. 3</strong>
+              </div>
+              <div class="end-stat-box">
+                <small>TURNS PLAYED</small>
+                <strong id="end-stat-turns">0 Turns</strong>
+              </div>
+              <div class="end-stat-box">
+                <small>FINAL LOADOUT</small>
+                <strong id="end-stat-gear">Gear</strong>
+              </div>
+            </div>
+            <div class="ending-btn-row">
+              <button id="download-pass-btn" class="download-pass-btn" type="button">
+                ★ Claim &amp; Download Pass (.PNG)
+              </button>
+              <button id="rpg-newgame-btn" class="rpg-replay-btn" type="button">
+                ↺ New Game+ (Replay)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODE 4: BAD ENDING -->
+        <div id="rpg-bad-ending-view" class="rpg-bad-ending-view" hidden>
+          <div class="bad-ending-card">
+            <span class="bad-tag">BAD ENDING // THE ENDLESS MONDAY SNOOZE</span>
+            <h3 class="bad-title">The Monochrome Gloom Prevailed...</h3>
+            <p class="bad-desc">
+              Kirana's HP hit zero and the evil alarm clock froze Café Leblanc in a 1,000-year sleepy Monday!
+              Chris le Shiba &amp; Morgana are poking you with a choco milk straw to wake back up.
+            </p>
+            <div class="ending-btn-row">
+              <button id="bad-load-btn" class="download-pass-btn" type="button">
+                ↺ Load Last Save
+              </button>
+              <button id="bad-retry-cafe-btn" class="rpg-replay-btn" type="button">
+                ☕ Wake Up in Café Safe Room (Keep Gear)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- OVERLAY: TYPEWRITER DIALOGUE & CHOICES -->
+        <div id="rpg-dialogue-overlay" class="rpg-overlay-panel" hidden>
+          <div id="rpg-dlg-box" class="vn-box vn-box-overlay">
+            <div id="rpg-dlg-portrait-wrap" class="vn-portrait-wrap">
+              <img id="rpg-dlg-avatar" src="" alt="Speaker Portrait" hidden />
+              <canvas id="rpg-dlg-sprite-portrait" width="108" height="118" hidden></canvas>
+            </div>
+            <div class="vn-dialogue-col">
+              <span id="rpg-dlg-speaker" class="vn-speaker">Narration</span>
+              <p id="rpg-dlg-text" class="vn-text"></p>
+              <div id="rpg-dlg-choices" class="dlg-choices-list" hidden></div>
+              <div class="vn-controls">
+                <span class="vn-tap-hint">Tap box to continue</span>
+                <button id="rpg-dlg-next-btn" class="vn-btn" type="button">Next ▼</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- OVERLAY: TABBED PARTY / EQUIP / BAG / SAVE MENU -->
+        <div id="rpg-menu-overlay" class="rpg-overlay-panel" hidden>
+          <div class="rpg-menu-card">
+            <div class="rpg-menu-header">
+              <div class="menu-tabs">
+                <button class="menu-tab-btn is-active" data-tab="status" type="button">Status</button>
+                <button class="menu-tab-btn" data-tab="equip" type="button">Equip</button>
+                <button class="menu-tab-btn" data-tab="bag" type="button">Bag</button>
+                <button class="menu-tab-btn" data-tab="save" type="button">Save / Load</button>
+              </div>
+              <button id="rpg-menu-close" class="subdrawer-close" type="button">✕</button>
+            </div>
+            <div id="rpg-menu-body" class="rpg-menu-body"></div>
+          </div>
+        </div>
+
+        <!-- OVERLAY: NON-LINEAR LEVEL UP BUILD PICKER -->
+        <div id="rpg-levelup-modal" class="rpg-overlay-panel" hidden>
+          <div class="rpg-levelup-card">
+            <div class="loot-badge">LEVEL UP! CHOOSE YOUR BUILD</div>
+            <p id="rpg-levelup-sub" class="levelup-sub">Kirana leveled up! Pick a stat growth path:</p>
+            <div class="levelup-grid">
+              <button id="lvl-pick-atk" class="levelup-choice-btn" type="button">
+                <strong>Artist Fury Path</strong>
+                <span>+6 ATK &amp; +5% Crit Chance</span>
+              </button>
+              <button id="lvl-pick-mag" class="levelup-choice-btn" type="button">
+                <strong>Velvet Arcana Path</strong>
+                <span>+8 MAG &amp; +15 Max SP</span>
+              </button>
+              <button id="lvl-pick-tank" class="levelup-choice-btn" type="button">
+                <strong>Cozy Tank Path</strong>
+                <span>+35 Max HP &amp; +3 DEF</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 13 Sentinels Thought Cloud Strip -->
+        <div class="thought-cloud-panel">
+          <div class="thought-cloud-head">
+            <span class="tc-badge">13 SENTINELS // THOUGHT CLOUD</span>
+            <span class="tc-hint">Tap a glowing keyword to recall a fragment</span>
+          </div>
+          <div id="thought-cloud-chips" class="thought-cloud-chips"></div>
+          <div id="thought-cloud-output" class="thought-cloud-output">
+            Select any keyword above to inspect its memory fragment.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         ACT V: DKV-INSPIRED PANTONE PALETTE
+         =================================================================== -->
+    <section id="palette-section" class="section-wrap reveal-block">
+      <!-- Hidden Easter Egg #2: DKV Brush Pen -->
+      <button
+        class="easter-egg egg-pos-palette"
+        data-egg-id="egg-brush"
+        type="button"
+        aria-label="Hidden Sketchbook Pen"
+        title="Psst... click this doodle!"
+      >
+        <svg viewBox="0 0 48 48">
+          <path d="M8 40 L14 28 L34 8 L40 14 L20 34 Z" fill="#C77DFF" stroke="#111015" stroke-width="2.5" />
+          <path d="M8 40 L14 28 L20 34 Z" fill="#E63946" stroke="#111015" stroke-width="2" />
+          <line x1="29" y1="13" x2="35" y2="19" stroke="#111015" stroke-width="2.5" />
+        </svg>
+      </button>
+
+      <div class="section-header">
+        <span id="palette-eyebrow" class="section-eyebrow">SECTION 03 // DKV COLOR STUDY</span>
+        <h2 id="palette-title" class="section-title">Colors You Brought Into My World</h2>
+        <p id="palette-subtitle" class="section-desc"></p>
+        <div class="palette-progress">
+          <span id="swatch-counter">0 / 6 Swatches Flipped</span>
+        </div>
+      </div>
+
+      <div id="pantone-grid" class="pantone-grid"></div>
+    </section>
+
+    <!-- ===================================================================
+         ACT VI: CONFIDANT RANK UP MINI-INTERACTION
+         =================================================================== -->
+    <section id="confidant-section" class="section-wrap reveal-block">
+      <!-- Hidden Easter Egg #3: Tiny Kitty Paw Print -->
+      <button
+        class="easter-egg egg-pos-confidant"
+        data-egg-id="egg-paw"
+        type="button"
+        aria-label="Hidden Cat Paw Print"
+        title="Tiny kitty paw print!"
+      >
+        <svg viewBox="0 0 44 44">
+          <ellipse cx="22" cy="28" rx="9" ry="7.5" fill="#C77DFF" stroke="#111015" stroke-width="2.5" />
+          <circle cx="11" cy="17" r="3.8" fill="#C77DFF" stroke="#111015" stroke-width="2.2" />
+          <circle cx="18" cy="11" r="3.8" fill="#C77DFF" stroke="#111015" stroke-width="2.2" />
+          <circle cx="26" cy="11" r="3.8" fill="#C77DFF" stroke="#111015" stroke-width="2.2" />
+          <circle cx="33" cy="17" r="3.8" fill="#C77DFF" stroke="#111015" stroke-width="2.2" />
+        </svg>
+      </button>
+
+      <div class="section-header">
+        <span id="confidant-eyebrow" class="section-eyebrow">SECTION 04 // CONFIDANT EVENT</span>
+        <h2 class="section-title">Confidant Bond Check</h2>
+      </div>
+
+      <div class="confidant-stage">
+        <div class="confidant-top-bar">
+          <div class="arcana-chip" id="confidant-arcana">ARCANA III: THE EMPRESS</div>
+          <div class="rank-meter">
+            <span class="rank-label">BOND RANK</span>
+            <div class="rank-stars" id="rank-stars" aria-label="Confidant rank stars">
+              <span>★</span><span>☆</span><span>☆</span><span>☆</span><span>☆</span>
+            </div>
+            <span id="rank-badge" class="rank-badge">RANK 1</span>
+          </div>
+        </div>
+
+        <div class="confidant-dialogue-row">
+          <div class="confidant-portrait-frame">
+            <img id="confidant-portrait" src="./assets/art/art-shiba-boy.jpg" alt="Chris le Shiba Confidant Portrait" />
+            <span id="confidant-portrait-caption" class="portrait-caption">CHRIS LE SHIBA</span>
+          </div>
+
+          <div class="dialogue-box">
+            <div class="speaker-tag" id="confidant-speaker">Chris le Shiba</div>
+            <p class="dialogue-text" id="confidant-prompt"></p>
+          </div>
+        </div>
+
+        <div id="confidant-choices" class="confidant-choices"></div>
+
+        <div id="confidant-response-box" class="confidant-response-box" hidden>
+          <p id="confidant-response-text" class="response-text"></p>
+        </div>
+
+        <div id="rank-up-banner" class="rank-up-banner" hidden>
+          <div class="rank-up-burst" aria-hidden="true">✦ ✦ ✦</div>
+          <div class="rank-up-kicker">CONFIDANT RANK UP!</div>
+          <div class="rank-up-transition">
+            <span class="old-rank">RANK 1</span>
+            <span class="arrow-rank">→</span>
+            <span class="max-rank">RANK MAX</span>
+          </div>
+          <h3 id="rank-up-title" class="rank-up-title">THE BLACC CAR WHO BROUGHT BACK COLOR</h3>
+          <p id="rank-up-subtitle" class="rank-up-sub"></p>
+          <div class="perk-unlocked">
+            <strong id="perk-title">CONFIDANT ABILITY UNLOCKED</strong>
+            <span id="perk-desc"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         ACT VII: PHANTOM THIEF CALLING CARD POSTER
+         =================================================================== -->
+    <section id="calling-card-section" class="section-wrap reveal-block">
+      <!-- Hidden Easter Egg #4: Metaphor: ReFantazio Seeker Wing -->
+      <button
+        class="easter-egg egg-pos-calling"
+        data-egg-id="egg-fairy"
+        type="button"
+        aria-label="Hidden Seeker Wing"
+        title="A shimmering fairy wing!"
+      >
+        <svg viewBox="0 0 46 46">
+          <path
+            d="M23 23 C12 8, 2 14, 7 25 C11 33, 19 30, 23 26 C27 30, 35 33, 39 25 C44 14, 34 8, 23 23 Z"
+            fill="#4EA8DE"
+            stroke="#111015"
+            stroke-width="2.2"
+          />
+          <circle cx="23" cy="23" r="4" fill="#E9C46A" stroke="#111015" stroke-width="2" />
+        </svg>
+      </button>
+
+      <div class="section-header">
+        <span id="calling-eyebrow" class="section-eyebrow">SECTION 05 // SPECIAL DELIVERY</span>
+        <h2 class="section-title">A Calling Card For You</h2>
+      </div>
+
+      <div class="calling-card-frame">
+        <article id="calling-card-poster" class="calling-card-poster">
+          <div class="cc-halftone" aria-hidden="true"></div>
+
+          <div class="cc-emblem" aria-hidden="true">
+            <svg viewBox="0 0 110 110">
+              <circle cx="55" cy="55" r="48" fill="#13101a" stroke="#C77DFF" stroke-width="3" />
+              <path
+                d="M22 48 C34 32, 76 32, 88 48 C82 65, 68 62, 55 54 C42 62, 28 65, 22 48 Z"
+                fill="#FFFDF7"
+              />
+              <ellipse cx="40" cy="49" rx="7" ry="4.5" fill="#13101a" />
+              <ellipse cx="70" cy="49" rx="7" ry="4.5" fill="#13101a" />
+              <path d="M40 32 L55 12 L70 32" fill="none" stroke="#9D4EDD" stroke-width="5" stroke-linecap="round" />
+              <text x="55" y="88" text-anchor="middle" fill="#FFFDF7" font-family="Anton, sans-serif" font-size="14" letter-spacing="2">
+                TAKE COLOR
+              </text>
+            </svg>
+          </div>
+
+          <div class="cc-to-strip" id="cc-to-line">TO: KIRANA, THE LORD OF GOOBERS</div>
+          <h3 class="cc-ransom-headline" id="cc-headline"></h3>
+          <p id="cc-body" class="cc-body"></p>
+
+          <div class="cc-footer-row">
+            <div class="cc-signoff">
+              <span class="cc-from-label">FROM:</span>
+              <span id="cc-signoff-name" class="cc-signoff-name">YOUR SHIBA, CHRIS</span>
+            </div>
+
+            <button id="stamp-card-btn" class="stamp-card-btn" type="button">
+              Stamp Birthday Seal
+            </button>
+          </div>
+
+          <div id="cc-stamped-seal" class="cc-stamped-seal" aria-hidden="true">
+            <span>BLACC CAR<br />APPROVED ★</span>
+          </div>
+
+          <div id="cc-design-spec" class="cc-design-spec"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         ACT VIII: THE HERMIT TAROT CARD REVEAL
+         =================================================================== -->
+    <section id="hermit-section" class="section-wrap reveal-block">
+      <!-- Hidden Easter Egg #5: Mini Choco Bar -->
+      <button
+        class="easter-egg egg-pos-hermit"
+        data-egg-id="egg-choco"
+        type="button"
+        aria-label="Hidden Chocolate Bar"
+        title="Emergency sweet treat!"
+      >
+        <svg viewBox="0 0 44 44">
+          <rect x="8" y="6" width="28" height="32" rx="4" fill="#6B4226" stroke="#111015" stroke-width="2.5" />
+          <line x1="8" y1="17" x2="36" y2="17" stroke="#452815" stroke-width="2" />
+          <line x1="8" y1="27" x2="36" y2="27" stroke="#452815" stroke-width="2" />
+          <line x1="22" y1="6" x2="22" y2="38" stroke="#452815" stroke-width="2" />
+          <path d="M7 22 L37 26 L37 38 L7 38 Z" fill="#9D4EDD" stroke="#111015" stroke-width="2" />
+        </svg>
+      </button>
+
+      <div class="section-header">
+        <span id="hermit-eyebrow" class="section-eyebrow">SECTION 06 // ARCANA REVEAL</span>
+        <h2 id="hermit-title" class="section-title">The Hermit</h2>
+        <p id="hermit-instruction" class="section-desc">
+          Click the face-down card to reveal your Arcana
+        </p>
+      </div>
+
+      <div class="hermit-alcove">
+        <div class="tarot-stage">
+          <div id="lantern-sparks" class="lantern-sparks" aria-hidden="true"></div>
+
+          <button
+            id="hermit-card-btn"
+            class="tarot-card-btn"
+            type="button"
+            aria-label="Reveal The Hermit Tarot Card"
+            aria-expanded="false"
+          >
+            <div class="tarot-card-inner" id="tarot-card-inner">
+              <div class="tarot-face tarot-back">
+                <svg viewBox="0 0 260 420" class="tarot-svg" aria-hidden="true">
+                  <rect x="8" y="8" width="244" height="404" rx="14" fill="#171226" stroke="#C77DFF" stroke-width="3" />
+                  <rect x="18" y="18" width="224" height="384" rx="8" fill="none" stroke="#E9C46A" stroke-width="1.2" stroke-dasharray="5 4" />
+                  <circle cx="130" cy="210" r="76" fill="none" stroke="#C77DFF" stroke-width="2" />
+                  <circle cx="130" cy="210" r="54" fill="none" stroke="#E9C46A" stroke-width="1.5" opacity="0.85" />
+                  <polygon points="130,124 196,210 130,296 64,210" fill="none" stroke="#C77DFF" stroke-width="1.8" />
+                  <polygon points="130,148 176,210 130,272 84,210" fill="none" stroke="#F4A261" stroke-width="1.5" />
+                  <circle cx="130" cy="210" r="14" fill="#E9C46A" opacity="0.9" />
+                  <polygon points="130,185 136,204 155,210 136,216 130,235 124,216 105,210 124,204" fill="#FFFDF7" />
+                  <text x="130" y="64" text-anchor="middle" fill="#E9C46A" font-family="Cormorant Garamond, serif" font-size="16" letter-spacing="4">
+                    ARCANA
+                  </text>
+                  <text x="130" y="368" text-anchor="middle" fill="#C77DFF" font-family="Space Grotesk, sans-serif" font-size="12" letter-spacing="3">
+                    TAP TO REVEAL
+                  </text>
+                </svg>
+              </div>
+
+              <div class="tarot-face tarot-front">
+                <svg viewBox="0 0 260 420" class="tarot-svg" aria-hidden="true">
+                  <defs>
+                    <radialGradient id="lanternGlow" cx="50%" cy="42%" r="48%">
+                      <stop offset="0%" stop-color="#FFF7D6" stop-opacity="1" />
+                      <stop offset="35%" stop-color="#F4A261" stop-opacity="0.72" />
+                      <stop offset="100%" stop-color="#19132B" stop-opacity="0" />
+                    </radialGradient>
+                    <linearGradient id="nightSky" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#161029" />
+                      <stop offset="65%" stop-color="#281B45" />
+                      <stop offset="100%" stop-color="#3C285E" />
+                    </linearGradient>
+                  </defs>
+
+                  <rect x="6" y="6" width="248" height="408" rx="14" fill="#F3ECFA" stroke="#111015" stroke-width="3" />
+                  <rect x="18" y="18" width="224" height="384" rx="8" fill="url(#nightSky)" stroke="#C77DFF" stroke-width="2" />
+
+                  <rect x="104" y="26" width="52" height="24" rx="4" fill="#F3ECFA" stroke="#111015" stroke-width="1.5" />
+                  <text x="130" y="43" text-anchor="middle" fill="#111015" font-family="Cormorant Garamond, serif" font-weight="700" font-size="17">
+                    IX
+                  </text>
+
+                  <circle cx="52" cy="82" r="2" fill="#FFFDF7" />
+                  <circle cx="204" cy="74" r="2.2" fill="#FFFDF7" />
+                  <circle cx="78" cy="116" r="1.5" fill="#E9C46A" />
+                  <circle cx="212" cy="134" r="1.8" fill="#C77DFF" />
+                  <circle cx="48" cy="158" r="1.6" fill="#C77DFF" />
+
+                  <circle cx="164" cy="176" r="88" fill="url(#lanternGlow)" />
+                  <polygon points="20,336 94,254 156,312 212,262 242,336" fill="#2E204E" stroke="#C77DFF" stroke-width="1.2" opacity="0.9" />
+
+                  <path
+                    d="M84 336 L98 202 C98 164, 118 148, 134 152 C148 156, 150 176, 144 196 L160 336 Z"
+                    fill="#140F21"
+                    stroke="#E9C46A"
+                    stroke-width="2"
+                  />
+                  <path d="M104 168 C108 136, 140 136, 144 166 C135 158, 118 162, 112 178 Z" fill="#2A1F42" stroke="#E9C46A" stroke-width="1.5" />
+                  <line x1="88" y1="336" x2="106" y2="178" stroke="#E9C46A" stroke-width="3" stroke-linecap="round" />
+                  <path d="M132 204 L164 188" stroke="#E9C46A" stroke-width="3" stroke-linecap="round" />
+
+                  <line x1="164" y1="188" x2="164" y2="198" stroke="#E9C46A" stroke-width="2" />
+                  <polygon points="154,198 174,198 178,224 150,224" fill="#FFF3C4" stroke="#E9C46A" stroke-width="2" />
+                  <polygon points="164,203 167,210 174,210 168,214 170,221 164,217 158,221 160,214 154,210 161,210" fill="#9D4EDD" />
+
+                  <rect x="34" y="348" width="192" height="38" rx="4" fill="#F3ECFA" stroke="#111015" stroke-width="2" />
+                  <text x="130" y="373" text-anchor="middle" fill="#111015" font-family="Anton, sans-serif" font-size="22" letter-spacing="2">
+                    THE HERMIT
+                  </text>
+                </svg>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        <div id="hermit-meaning-card" class="hermit-meaning-card" hidden>
+          <div class="hermit-badge">IX // THE HERMIT REVEALED</div>
+          <blockquote id="hermit-lantern-quote" class="hermit-quote"></blockquote>
+          <p id="hermit-personal-note" class="hermit-note"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         ACT IX: FINAL HEARTFELT LETTER ("from el goober, chris")
+         =================================================================== -->
+    <section id="letter-section" class="section-wrap letter-section reveal-block">
+      <!-- Hidden Easter Egg #6: Velvet Butterfly -->
+      <button
+        class="easter-egg egg-pos-letter"
+        data-egg-id="egg-butterfly"
+        type="button"
+        aria-label="Hidden Velvet Butterfly"
+        title="One last butterfly!"
+      >
+        <svg viewBox="0 0 48 40">
+          <path
+            d="M24 20 C14 5, 2 9, 6 20 C9 28, 19 26, 24 22 C29 26, 39 28, 42 20 C46 9, 34 5, 24 20 Z"
+            fill="#9D4EDD"
+            stroke="#111015"
+            stroke-width="2"
+          />
+          <path
+            d="M24 22 C18 26, 11 32, 14 36 C18 38, 22 31, 24 25 C26 31, 30 38, 34 36 C37 32, 30 26, 24 22 Z"
+            fill="#C77DFF"
+            stroke="#111015"
+            stroke-width="1.8"
+          />
+        </svg>
+      </button>
+
+      <div class="section-header">
+        <span id="letter-eyebrow" class="section-eyebrow">FINAL NOTE // OPEN LETTER</span>
+      </div>
+
+      <article class="letter-paper">
+        <div class="letter-tape" aria-hidden="true"></div>
+        <h2 id="letter-salutation" class="letter-salutation">Dear Kirana,</h2>
+        <div id="letter-body" class="letter-body"></div>
+        <div class="letter-signoff-row">
+          <div class="letter-sticker-wrap">
+            <img id="letter-art-stamp" src="./assets/art/art-blacc-car-shiba.jpg" alt="Blacc Car and Shiba cuddle doodle" />
+          </div>
+          <div class="letter-signoff">
+            <p id="letter-closing" class="letter-closing"></p>
+            <p id="letter-signature" class="letter-signature">from el goober, chris</p>
+          </div>
+        </div>
+      </article>
+
+      <div class="footer-replay">
+        <button id="rewrap-btn" class="rewrap-btn" type="button">
+          ↺ Re-wrap Gift &amp; Replay Intro
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Polaroid & Art Zoom Lightbox Modal + Brief Song Preview Bar -->
+  <div id="photo-lightbox" class="photo-lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-caption" hidden>
+    <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
+    <div class="lightbox-card">
+      <button id="lightbox-close" class="lightbox-close" type="button" aria-label="Close photo">✕</button>
+      <div class="lightbox-img-wrap">
+        <img id="lightbox-img" src="" alt="" />
+      </div>
+
+      <div id="lightbox-song-bar" class="lightbox-song-bar">
+        <span class="song-eq" id="lightbox-song-eq"><i></i><i></i><i></i></span>
+        <span id="lightbox-song-title" class="lightbox-song-title">Playing Preview...</span>
+        <button id="lightbox-replay-song" class="lightbox-replay-song" type="button" title="Replay brief snippet">↻</button>
+      </div>
+
+      <div class="lightbox-meta">
+        <span id="lightbox-badge" class="lightbox-badge"></span>
+        <h3 id="lightbox-caption" class="lightbox-caption"></h3>
+        <p id="lightbox-note" class="lightbox-note"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Easter Egg Comic Speech Bubble Modal / Toast -->
+  <div id="egg-toast" class="egg-toast" role="status" aria-live="polite" hidden>
+    <div class="egg-toast-inner">
+      <div class="egg-toast-header">
+        <span id="egg-toast-title" class="egg-toast-title">Secret Found!</span>
+        <button id="egg-toast-close" class="egg-toast-close" type="button" aria-label="Close secret note">✕</button>
+      </div>
+      <p id="egg-toast-msg" class="egg-toast-msg"></p>
+    </div>
+  </div>
+
+  <script src="content.js"></script>
+  <script src="audio.js"></script>
+  <script src="rpg-data.js"></script>
+  <script src="rpg.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
