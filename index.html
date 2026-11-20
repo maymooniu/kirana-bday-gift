@@ -114,8 +114,16 @@
       <div class="hud-left">
         <button id="music-toggle-btn" class="hud-pill hud-music-btn" type="button" title="Play or Pause Music">
           <span class="eq-bars" aria-hidden="true"><i></i><i></i><i></i></span>
-          <span id="music-track-name" class="track-name">Beneath the Mask (Rainy Mood)</span>
+          <span id="music-track-name" class="track-name">Rainy Café Side A</span>
           <span id="music-state-badge" class="music-badge">PLAYING</span>
+        </button>
+
+        <button id="music-next-btn" class="hud-pill hud-icon-btn" type="button" title="Switch to Next Website Song" aria-label="Next Website Song">
+          ⏭
+        </button>
+
+        <button id="rain-ambience-btn" class="hud-pill hud-rain-btn" type="button" aria-pressed="false" title="Toggle Cozy Rainy Window Ambience">
+          ☂ RAIN
         </button>
 
         <div class="hud-pill hud-volume-wrap" title="Volume">
@@ -123,8 +131,8 @@
           <input id="volume-slider" type="range" min="0" max="1" step="0.05" value="0.45" aria-label="Music volume" />
         </div>
 
-        <!-- Madoka Magica Soul Gem Secret Tracker -->
-        <div id="egg-counter-pill" class="hud-pill hud-egg-counter" title="Find hidden doodles to purify your Soul Gem!">
+        <!-- Madoka Magica Soul Gem Secret Tracker (Clickable to open Secret Vault!) -->
+        <button id="egg-counter-pill" class="hud-pill hud-egg-counter" type="button" title="Click to inspect your Soul Gem & Secret Memory Vault!">
           <svg id="hud-soul-gem" class="soul-gem-svg level-0" viewBox="0 0 28 34" aria-hidden="true">
             <ellipse cx="14" cy="17" rx="9" ry="12" fill="currentColor" stroke="#E9C46A" stroke-width="2" />
             <polygon points="14,7 19,17 14,27 9,17" fill="#FFFDF7" opacity="0.55" />
@@ -132,7 +140,7 @@
             <circle cx="14" cy="29" r="2.2" fill="#E9C46A" />
           </svg>
           <span id="egg-counter-text">0 / 6 SOUL GEM</span>
-        </div>
+        </button>
 
         <!-- Palace Map & Completion Tracker Trigger -->
         <button id="map-toggle-btn" class="hud-pill hud-map-btn" type="button" aria-expanded="false">
@@ -181,6 +189,9 @@
           <div id="completion-100-banner" class="completion-100-banner" hidden>
             ★ 100% COMPLETE! Official Rank S Phantom Artist &amp; Supreme Lord of Goobers! ★
           </div>
+          <button id="reset-progress-btn" class="reset-progress-btn" type="button">
+            ↺ Reset Easter Eggs &amp; Site Progress
+          </button>
         </div>
       </div>
     </aside>
@@ -332,10 +343,12 @@
           <div class="coaster-tools">
             <button class="pen-swatch is-active" data-color="#c77dff" style="background:#c77dff" type="button" title="Kirana Purple"></button>
             <button class="pen-swatch" data-color="#e9c46a" style="background:#e9c46a" type="button" title="Cafe Gold"></button>
+            <button class="pen-swatch" data-color="#4ea8de" style="background:#4ea8de" type="button" title="Velvet Sky"></button>
             <button class="pen-swatch" data-color="#f4eefb" style="background:#f4eefb" type="button" title="Cream Chalk"></button>
             <button class="pen-swatch" data-color="#e63946" style="background:#e63946" type="button" title="Phantom Crimson"></button>
-            <button id="pen-mode-star" class="tool-chip" type="button" title="Stamp Stars">★ Stamp</button>
+            <button id="pen-mode-star" class="tool-chip" type="button" title="Stamp Stars">★ Star</button>
             <button id="pen-mode-paw" class="tool-chip" type="button" title="Stamp Kitty Paws">🐾 Paw</button>
+            <button id="pen-mode-coffee" class="tool-chip" type="button" title="Stamp Leblanc Coffee">☕ Coffee</button>
             <button id="coaster-clear-btn" class="tool-chip" type="button">Clear</button>
             <button id="coaster-save-btn" class="tool-chip tool-save" type="button">Save .PNG</button>
           </div>
@@ -595,13 +608,14 @@
         <div class="tarot-stage">
           <div id="lantern-sparks" class="lantern-sparks" aria-hidden="true"></div>
 
-          <button
-            id="hermit-card-btn"
-            class="tarot-card-btn"
-            type="button"
-            aria-label="Reveal The Hermit Tarot Card"
-            aria-expanded="false"
-          >
+          <div id="tarot-spin-rig" class="tarot-spin-rig">
+            <button
+              id="hermit-card-btn"
+              class="tarot-card-btn"
+              type="button"
+              aria-label="Reveal The Hermit Tarot Card"
+              aria-expanded="false"
+            >
             <div class="tarot-card-inner" id="tarot-card-inner">
               <div class="tarot-face tarot-back">
                 <svg viewBox="0 0 260 420" class="tarot-svg" aria-hidden="true">
@@ -675,7 +689,8 @@
                 </svg>
               </div>
             </div>
-          </button>
+            </button>
+          </div>
         </div>
 
         <div id="hermit-meaning-card" class="hermit-meaning-card" hidden>
@@ -810,7 +825,14 @@
   <div id="photo-lightbox" class="photo-lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-caption" hidden>
     <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
     <div class="lightbox-card">
-      <button id="lightbox-close" class="lightbox-close" type="button" aria-label="Close photo">✕</button>
+      <div class="lightbox-top-controls">
+        <span id="lightbox-counter" class="lightbox-counter">1 / 6</span>
+        <div class="lightbox-nav-btns">
+          <button id="lightbox-prev" class="lightbox-nav-btn" type="button" aria-label="Previous item">◀</button>
+          <button id="lightbox-next" class="lightbox-nav-btn" type="button" aria-label="Next item">▶</button>
+          <button id="lightbox-close" class="lightbox-close" type="button" aria-label="Close photo">✕</button>
+        </div>
+      </div>
       <div class="lightbox-img-wrap">
         <img id="lightbox-img" src="" alt="" />
       </div>
@@ -837,6 +859,31 @@
         <button id="egg-toast-close" class="egg-toast-close" type="button" aria-label="Close secret note">✕</button>
       </div>
       <p id="egg-toast-msg" class="egg-toast-msg"></p>
+    </div>
+  </div>
+
+  <!-- Secret Soul Gem Memory Vault Modal -->
+  <div id="vault-modal" class="vault-modal" role="dialog" aria-modal="true" aria-labelledby="vault-title" hidden>
+    <div id="vault-backdrop" class="vault-backdrop"></div>
+    <div class="vault-card">
+      <div class="vault-head">
+        <div>
+          <span class="vault-eyebrow">SOUL GEM ARCHIVE // 6 SECRETS</span>
+          <h3 id="vault-title" class="vault-title">The Blacc Car Memory Vault</h3>
+        </div>
+        <button id="vault-close" class="lightbox-close" type="button" aria-label="Close Memory Vault">✕</button>
+      </div>
+      <p id="vault-status-note" class="vault-status-note"></p>
+      <div id="vault-eggs-grid" class="vault-eggs-grid"></div>
+      <div id="vault-memories-wrap" class="vault-memories-wrap" hidden>
+        <div class="vault-unlock-banner">★ 6 / 6 SOUL GEM PURIFIED // BONUS INSIDE-JOKES VAULT UNLOCKED! ★</div>
+        <div id="vault-memories-grid" class="vault-memories-grid"></div>
+      </div>
+      <div class="vault-footer-actions">
+        <button id="vault-reset-btn" class="reset-progress-btn" type="button">
+          ↺ Reset Easter Eggs &amp; Replay Secrets
+        </button>
+      </div>
     </div>
   </div>
 

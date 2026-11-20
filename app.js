@@ -10,15 +10,49 @@
 
   const $ = (id) => document.getElementById(id);
 
+  const SITE_PROGRESS_KEY = "kirana_site_progress_v1";
+  const COASTER_ART_KEY = "kirana_coaster_art_v1";
+
   // State trackers
   const flippedSwatches = new Set();
   const foundEggs = new Set();
+  let confidantStageIdx = 0;
   let confidantMaxed = false;
   let hermitRevealed = false;
   let cardStamped = false;
+  let candlesBlown = false;
   let eggToastTimer = null;
   let rainInitialized = false;
   let activeLightboxPhoto = null;
+  let activeLightboxList = [];
+  let activeLightboxIndex = 0;
+  let activeLightboxIsArt = false;
+
+  function saveSiteProgress() {
+    try {
+      const payload = {
+        eggs: [...foundEggs],
+        swatches: [...flippedSwatches],
+        tasks: [...completedTasks],
+        confidantStageIdx,
+        confidantMaxed,
+        hermitRevealed,
+        cardStamped,
+        candlesBlown
+      };
+      localStorage.setItem(SITE_PROGRESS_KEY, JSON.stringify(payload));
+    } catch (_) {}
+  }
+
+  function loadSiteProgress() {
+    try {
+      const raw = localStorage.getItem(SITE_PROGRESS_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (_) {
+      return null;
+    }
+  }
 
   // ==========================================================================
   // 1. HYDRATE CONTENT FROM content.js
@@ -331,6 +365,25 @@
       updateMusicHUD(nowPlaying);
     });
 
+    const nextBtn = $("music-next-btn");
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => {
+        window.soundEngine.stopSongPreview(false);
+        window.soundEngine.nextWebsiteTrack();
+        updateMusicHUD(true);
+      });
+    }
+
+    const rainBtn = $("rain-ambience-btn");
+    if (rainBtn) {
+      rainBtn.addEventListener("click", () => {
+        const active = window.soundEngine.toggleRainAmbience();
+        rainBtn.classList.toggle("is-active", active);
+        rainBtn.setAttribute("aria-pressed", String(active));
+        rainBtn.textContent = active ? "☂ RAIN ON" : "☂ RAIN";
+      });
+    }
+
     $("volume-slider").addEventListener("input", (e) => {
       window.soundEngine.setVolume(e.target.value);
     });
@@ -404,7 +457,7 @@
     const grid = $("polaroid-grid");
     grid.innerHTML = "";
 
-    C.scrapbook.photos.forEach((photo) => {
+    C.scrapbook.photos.forEach((photo, idx) => {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "polaroid-card";
@@ -419,7 +472,7 @@
       `;
 
       btn.addEventListener("click", () => {
-        openLightbox(photo);
+        openLightbox(C.scrapbook.photos, idx, false);
       });
 
       grid.appendChild(btn);
@@ -453,7 +506,7 @@
     const grid = $("art-gallery-grid");
     grid.innerHTML = "";
 
-    C.artGallery.pieces.forEach((art) => {
+    C.artGallery.pieces.forEach((art, idx) => {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "art-card";
@@ -467,35 +520,62 @@
       `;
       btn.addEventListener("click", () => {
         window.soundEngine.playFlipSfx();
-        openLightbox(art, true);
+        openLightbox(C.artGallery.pieces, idx, true);
       });
       grid.appendChild(btn);
     });
   }
 
-  function openLightbox(item, isArt = false) {
+  function showLightboxCurrentItem() {
+    const item = activeLightboxList[activeLightboxIndex];
+    if (!item) return;
+
     const modal = $("photo-lightbox");
     const imgEl = $("lightbox-img");
     const songBar = $("lightbox-song-bar");
+    const counterEl = $("lightbox-counter");
 
     imgEl.src = item.src;
-    imgEl.alt = isArt ? item.title : item.caption;
-    imgEl.classList.toggle("is-art-contain", isArt);
+    imgEl.alt = activeLightboxIsArt ? item.title : item.caption;
+    imgEl.classList.toggle("is-art-contain", activeLightboxIsArt);
 
     $("lightbox-badge").textContent = item.badge;
-    $("lightbox-caption").textContent = isArt ? item.title : item.caption;
+    $("lightbox-caption").textContent = activeLightboxIsArt ? item.title : item.caption;
     $("lightbox-note").textContent = item.note;
+    if (counterEl) {
+      counterEl.textContent = `${activeLightboxIndex + 1} / ${activeLightboxList.length}`;
+    }
     modal.hidden = false;
 
-    if (isArt) {
+    if (activeLightboxIsArt) {
       activeLightboxPhoto = null;
       songBar.hidden = true;
+      window.soundEngine.stopSongPreview(true);
     } else {
       activeLightboxPhoto = item;
       songBar.hidden = false;
       markCompletionTask("photos");
       startPhotoSongPreview(item);
     }
+  }
+
+  function openLightbox(listOrItem, index = 0, isArt = false) {
+    if (Array.isArray(listOrItem)) {
+      activeLightboxList = listOrItem;
+      activeLightboxIndex = Math.max(0, Math.min(index, listOrItem.length - 1));
+    } else {
+      activeLightboxList = [listOrItem];
+      activeLightboxIndex = 0;
+    }
+    activeLightboxIsArt = isArt;
+    showLightboxCurrentItem();
+  }
+
+  function stepLightbox(delta) {
+    if (!activeLightboxList.length) return;
+    activeLightboxIndex = (activeLightboxIndex + delta + activeLightboxList.length) % activeLightboxList.length;
+    window.soundEngine.playFlipSfx();
+    showLightboxCurrentItem();
   }
 
   function closeLightbox() {
@@ -508,15 +588,21 @@
   function setupLightbox() {
     $("lightbox-close").addEventListener("click", closeLightbox);
     $("lightbox-backdrop").addEventListener("click", closeLightbox);
+    const prevBtn = $("lightbox-prev");
+    const nextBtn = $("lightbox-next");
+    if (prevBtn) prevBtn.addEventListener("click", () => stepLightbox(-1));
+    if (nextBtn) nextBtn.addEventListener("click", () => stepLightbox(1));
+
     $("lightbox-replay-song").addEventListener("click", () => {
       if (activeLightboxPhoto) {
         startPhotoSongPreview(activeLightboxPhoto);
       }
     });
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !$("photo-lightbox").hidden) {
-        closeLightbox();
-      }
+      if ($("photo-lightbox").hidden) return;
+      if (e.key === "Escape") closeLightbox();
+      else if (e.key === "ArrowLeft") stepLightbox(-1);
+      else if (e.key === "ArrowRight") stepLightbox(1);
     });
   }
 
@@ -628,6 +714,7 @@
         if (flippedSwatches.size === total) {
           markCompletionTask("palette");
         }
+        saveSiteProgress();
       });
 
       grid.appendChild(card);
@@ -635,19 +722,60 @@
   }
 
   // ==========================================================================
-  // 7. CONFIDANT RANK UP MINI-INTERACTION
+  // 7. CONFIDANT RANK UP MULTI-STAGE HANGOUT
   // ==========================================================================
-  function renderConfidantChoices() {
-    const list = $("confidant-choices");
-    const responseBox = $("confidant-response-box");
-    const responseText = $("confidant-response-text");
-    const rankBanner = $("rank-up-banner");
+  function updateConfidantVisuals() {
     const rankStars = $("rank-stars");
     const rankBadge = $("rank-badge");
+    const rankBanner = $("rank-up-banner");
+    if (!rankStars || !rankBadge) return;
+
+    if (confidantMaxed) {
+      rankStars.innerHTML = "<span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>";
+      rankStars.classList.add("is-max");
+      rankBadge.textContent = "RANK MAX";
+      rankBadge.classList.add("is-max");
+      if (rankBanner) rankBanner.hidden = false;
+    } else if (confidantStageIdx === 0) {
+      rankStars.innerHTML = "<span>★</span><span>☆</span><span>☆</span><span>☆</span><span>☆</span>";
+      rankStars.classList.remove("is-max");
+      rankBadge.textContent = "RANK 1";
+      rankBadge.classList.remove("is-max");
+      if (rankBanner) rankBanner.hidden = true;
+    } else if (confidantStageIdx === 1) {
+      rankStars.innerHTML = "<span>★</span><span>★</span><span>★</span><span>☆</span><span>☆</span>";
+      rankStars.classList.remove("is-max");
+      rankBadge.textContent = "RANK 3";
+      rankBadge.classList.remove("is-max");
+      if (rankBanner) rankBanner.hidden = true;
+    } else {
+      rankStars.innerHTML = "<span>★</span><span>★</span><span>★</span><span>★</span><span>☆</span>";
+      rankStars.classList.remove("is-max");
+      rankBadge.textContent = "RANK 4";
+      rankBadge.classList.remove("is-max");
+      if (rankBanner) rankBanner.hidden = true;
+    }
+  }
+
+  function renderConfidantChoices() {
+    const list = $("confidant-choices");
+    const promptEl = $("confidant-prompt");
+    const responseBox = $("confidant-response-box");
+    const responseText = $("confidant-response-text");
 
     list.innerHTML = "";
+    const stages = Array.isArray(C.confidant.stages) && C.confidant.stages.length > 0
+      ? C.confidant.stages
+      : [{ prompt: C.confidant.promptLine, choices: C.confidant.choices }];
+    const activeIdx = Math.min(confidantStageIdx, stages.length - 1);
+    const stageData = stages[activeIdx];
 
-    C.confidant.choices.forEach((choice, idx) => {
+    if (promptEl && stageData.prompt) {
+      promptEl.textContent = stageData.prompt;
+    }
+    updateConfidantVisuals();
+
+    stageData.choices.forEach((choice, idx) => {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "choice-btn";
@@ -663,16 +791,32 @@
         responseBox.hidden = false;
         responseText.textContent = choice.response;
 
+        if (!confidantMaxed && activeIdx < stages.length - 1) {
+          window.soundEngine.playChimeSfx(false);
+          confidantStageIdx = activeIdx + 1;
+          saveSiteProgress();
+          const nextBtn = document.createElement("button");
+          nextBtn.type = "button";
+          nextBtn.className = "choice-btn choice-next-stage";
+          nextBtn.innerHTML = `<span class="choice-index">▶</span><span>Continue Hangout (${confidantStageIdx + 1} / ${stages.length})</span>`;
+          nextBtn.addEventListener("click", () => {
+            window.soundEngine.playFlipSfx();
+            renderConfidantChoices();
+          });
+          list.innerHTML = "";
+          list.appendChild(btn);
+          list.appendChild(nextBtn);
+          updateConfidantVisuals();
+          return;
+        }
+
         if (!confidantMaxed) {
           confidantMaxed = true;
           window.soundEngine.playChimeSfx(true);
-          rankStars.innerHTML = "<span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>";
-          rankStars.classList.add("is-max");
-          rankBadge.textContent = "RANK MAX";
-          rankBadge.classList.add("is-max");
-          rankBanner.hidden = false;
+          updateConfidantVisuals();
           markCompletionTask("confidant");
           launchBirthdayConfetti(60);
+          saveSiteProgress();
         } else {
           window.soundEngine.playChimeSfx(false);
         }
@@ -708,6 +852,7 @@
       if (!cardStamped) {
         cardStamped = true;
         btn.textContent = "Seal Stamped ★";
+        saveSiteProgress();
       }
     });
   }
@@ -769,12 +914,13 @@
         meaningCard.hidden = false;
         instruction.textContent = "Arcana IX revealed! Tap the card anytime to turn it over.";
         markCompletionTask("hermit");
+        saveSiteProgress();
       }, 680);
     });
   }
 
   // ==========================================================================
-  // 10. HIDDEN CLICKABLE EASTER EGGS (SOUL GEM CHARGE)
+  // 10. HIDDEN CLICKABLE EASTER EGGS (SOUL GEM CHARGE + SECRET MEMORY VAULT)
   // ==========================================================================
   function showEggToast(title, msg) {
     const toast = $("egg-toast");
@@ -788,14 +934,87 @@
     }, 6800);
   }
 
+  function updateSoulGemCounterUI() {
+    const total = C.easterEggs.length;
+    const count = foundEggs.size;
+    const counterText = $("egg-counter-text");
+    const soulGem = $("hud-soul-gem");
+    if (counterText) counterText.textContent = `${count} / ${total} SOUL GEM`;
+    if (soulGem) soulGem.setAttribute("class", `soul-gem-svg level-${count}`);
+  }
+
+  function renderVaultModal() {
+    const total = C.easterEggs.length;
+    const count = foundEggs.size;
+    const noteEl = $("vault-status-note");
+    const grid = $("vault-eggs-grid");
+    const memWrap = $("vault-memories-wrap");
+    const memGrid = $("vault-memories-grid");
+    if (!grid || !memWrap || !memGrid) return;
+
+    if (noteEl) {
+      noteEl.textContent =
+        count === total
+          ? "Soul Gem 100% purified! All 6 hidden secrets discovered and Memory Vault unlocked."
+          : `Found ${count} of ${total} hidden secrets around the site! Find all ${total} to unlock the Bonus Inside-Jokes Vault.`;
+    }
+
+    grid.innerHTML = "";
+    C.easterEggs.forEach((egg) => {
+      const unlocked = foundEggs.has(egg.id);
+      const card = document.createElement("div");
+      card.className = `vault-egg-card ${unlocked ? "is-unlocked" : "is-locked"}`;
+      card.innerHTML = unlocked
+        ? `<strong>★ ${egg.label}</strong><small>${egg.title}</small><p>${egg.message}</p>`
+        : `<strong>? Locked Secret (${egg.label})</strong><small>Hidden nearby in the website sections...</small>`;
+      grid.appendChild(card);
+    });
+
+    if (count === total && Array.isArray(C.secretVault)) {
+      memWrap.hidden = false;
+      memGrid.innerHTML = "";
+      C.secretVault.forEach((m) => {
+        const div = document.createElement("div");
+        div.className = "vault-memory-card";
+        div.innerHTML = `<span>${m.tag}</span><h4>${m.title}</h4><p>${m.text}</p>`;
+        memGrid.appendChild(div);
+      });
+    } else {
+      memWrap.hidden = true;
+    }
+  }
+
+  function openVaultModal() {
+    const modal = $("vault-modal");
+    if (!modal) return;
+    renderVaultModal();
+    modal.hidden = false;
+    window.soundEngine.playScanSfx();
+  }
+
+  function closeVaultModal() {
+    const modal = $("vault-modal");
+    if (modal) modal.hidden = true;
+  }
+
   function setupEasterEggs() {
     const eggButtons = document.querySelectorAll(".easter-egg");
     const total = C.easterEggs.length;
-    const counterText = $("egg-counter-text");
-    const soulGem = $("hud-soul-gem");
 
     $("egg-toast-close").addEventListener("click", () => {
       $("egg-toast").hidden = true;
+    });
+
+    const pillBtn = $("egg-counter-pill");
+    if (pillBtn) pillBtn.addEventListener("click", openVaultModal);
+    const vClose = $("vault-close");
+    if (vClose) vClose.addEventListener("click", closeVaultModal);
+    const vBackdrop = $("vault-backdrop");
+    if (vBackdrop) vBackdrop.addEventListener("click", closeVaultModal);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && $("vault-modal") && !$("vault-modal").hidden) {
+        closeVaultModal();
+      }
     });
 
     eggButtons.forEach((btn) => {
@@ -809,16 +1028,19 @@
         foundEggs.add(eggId);
         btn.classList.add("is-found");
 
-        const count = foundEggs.size;
-        counterText.textContent = `${count} / ${total} SOUL GEM`;
-        soulGem.setAttribute("class", `soul-gem-svg level-${count}`);
+        updateSoulGemCounterUI();
+        saveSiteProgress();
 
-        if (isFirstFind && count === total) {
+        if (isFirstFind && foundEggs.size === total) {
           showEggToast(
             `SOUL GEM AT 100%! (${total}/${total}) ★`,
-            `${data.message} Plus, you unlocked the Radiant Purple Soul Gem Trophy for finding every secret!`
+            `${data.message} Opening your Secret Memory Vault!`
           );
-          setTimeout(() => window.soundEngine.playChimeSfx(true), 260);
+          launchBirthdayConfetti(110);
+          setTimeout(() => {
+            window.soundEngine.playChimeSfx(true);
+            openVaultModal();
+          }, 420);
         } else {
           showEggToast(data.title, data.message);
         }
@@ -884,7 +1106,7 @@
   const completedTasks = new Set();
   const TOTAL_TASKS = 6;
 
-  function markCompletionTask(taskKey) {
+  function markCompletionTask(taskKey, silent = false) {
     if (completedTasks.has(taskKey)) return;
     completedTasks.add(taskKey);
 
@@ -903,8 +1125,153 @@
     if (completedTasks.size === TOTAL_TASKS) {
       const banner = $("completion-100-banner");
       if (banner) banner.hidden = false;
-      launchBirthdayConfetti(140);
-      setTimeout(() => window.soundEngine.playChimeSfx(true), 200);
+      if (!silent) {
+        launchBirthdayConfetti(140);
+        setTimeout(() => window.soundEngine.playChimeSfx(true), 200);
+      }
+    }
+
+    if (!silent) saveSiteProgress();
+  }
+
+  function resetWebsiteSecretsAndProgress() {
+    window.soundEngine.playFlipSfx();
+    foundEggs.clear();
+    flippedSwatches.clear();
+    completedTasks.clear();
+    confidantStageIdx = 0;
+    confidantMaxed = false;
+    hermitRevealed = false;
+    cardStamped = false;
+    candlesBlown = false;
+
+    try {
+      localStorage.removeItem(SITE_PROGRESS_KEY);
+    } catch (_) {}
+
+    document.querySelectorAll(".easter-egg").forEach((b) => b.classList.remove("is-found"));
+    updateSoulGemCounterUI();
+
+    document.querySelectorAll(".pantone-card").forEach((c) => {
+      c.classList.remove("is-flipped");
+      c.setAttribute("aria-pressed", "false");
+    });
+    const swatchCounter = $("swatch-counter");
+    if (swatchCounter) swatchCounter.textContent = `0 / ${C.paletteSection.swatches.length} Swatches Flipped`;
+
+    document.querySelectorAll("#completion-checklist li").forEach((li) => {
+      li.classList.remove("is-done");
+      const box = li.querySelector(".chk-box");
+      if (box) box.textContent = "☐";
+    });
+    const badge = $("map-progress-badge");
+    if (badge) badge.textContent = `0 / ${TOTAL_TASKS}`;
+    const banner = $("completion-100-banner");
+    if (banner) banner.hidden = true;
+
+    // Preserve RPG clear status if RPG was cleared in localStorage
+    try {
+      if (localStorage.getItem("kirana_rpg_completed_v1") === "1") {
+        markCompletionTask("rpg", true);
+      }
+    } catch (_) {}
+
+    renderConfidantChoices();
+    const respBox = $("confidant-response-box");
+    if (respBox) respBox.hidden = true;
+
+    const cardBtn = $("hermit-card-btn");
+    const meaningCard = $("hermit-meaning-card");
+    const instruction = $("hermit-instruction");
+    if (cardBtn) {
+      cardBtn.classList.remove("is-revealed", "is-charging");
+      cardBtn.setAttribute("aria-expanded", "false");
+    }
+    if (meaningCard) meaningCard.hidden = true;
+    if (instruction) instruction.textContent = C.hermit.instruction;
+
+    const seal = $("cc-stamped-seal");
+    const stampBtn = $("stamp-card-btn");
+    if (seal) seal.classList.remove("is-stamped");
+    if (stampBtn) stampBtn.textContent = "Stamp Acceptance Seal";
+
+    const wishVisual = $("wish-cake-visual");
+    const blowBtn = $("blow-candles-btn");
+    const wishStatus = $("wish-status");
+    if (wishVisual) wishVisual.classList.remove("is-blown");
+    if (blowBtn) blowBtn.textContent = "Make a Wish & Blow Out Candles";
+    if (wishStatus) wishStatus.textContent = "3 glowing candles waiting!";
+
+    renderVaultModal();
+    closeVaultModal();
+    showEggToast("Progress & Easter Eggs Reset!", "All 6 hidden secrets, Tarot, Confidant hangout, and swatches are fresh to discover again!");
+  }
+
+  function restoreSiteProgress() {
+    const saved = loadSiteProgress();
+    if (!saved) return;
+
+    if (Array.isArray(saved.eggs)) {
+      saved.eggs.forEach((id) => {
+        foundEggs.add(id);
+        const el = document.querySelector(`.easter-egg[data-egg-id="${id}"]`);
+        if (el) el.classList.add("is-found");
+      });
+      updateSoulGemCounterUI();
+    }
+
+    if (Array.isArray(saved.swatches)) {
+      const cards = document.querySelectorAll(".pantone-card");
+      C.paletteSection.swatches.forEach((sw, i) => {
+        if (saved.swatches.includes(sw.id)) {
+          flippedSwatches.add(sw.id);
+          if (cards[i]) {
+            cards[i].classList.add("is-flipped");
+            cards[i].setAttribute("aria-pressed", "true");
+          }
+        }
+      });
+      const counter = $("swatch-counter");
+      if (counter) counter.textContent = `${flippedSwatches.size} / ${C.paletteSection.swatches.length} Swatches Flipped`;
+    }
+
+    if (typeof saved.confidantStageIdx === "number") confidantStageIdx = saved.confidantStageIdx;
+    if (saved.confidantMaxed) confidantMaxed = true;
+    renderConfidantChoices();
+
+    if (saved.hermitRevealed) {
+      hermitRevealed = true;
+      const cardBtn = $("hermit-card-btn");
+      const meaningCard = $("hermit-meaning-card");
+      const instruction = $("hermit-instruction");
+      if (cardBtn) {
+        cardBtn.classList.add("is-revealed");
+        cardBtn.setAttribute("aria-expanded", "true");
+      }
+      if (meaningCard) meaningCard.hidden = false;
+      if (instruction) instruction.textContent = "Arcana IX revealed! Tap the card anytime to turn it over.";
+    }
+
+    if (saved.cardStamped) {
+      cardStamped = true;
+      const seal = $("cc-stamped-seal");
+      const stampBtn = $("stamp-card-btn");
+      if (seal) seal.classList.add("is-stamped");
+      if (stampBtn) stampBtn.textContent = "Seal Stamped ★";
+    }
+
+    if (saved.candlesBlown) {
+      candlesBlown = true;
+      const visual = $("wish-cake-visual");
+      const blowBtn = $("blow-candles-btn");
+      const status = $("wish-status");
+      if (visual) visual.classList.add("is-blown");
+      if (blowBtn) blowBtn.textContent = "Relight Birthday Candles";
+      if (status) status.textContent = "Wish made! Happy Birthday, Kirana!";
+    }
+
+    if (Array.isArray(saved.tasks)) {
+      saved.tasks.forEach((t) => markCompletionTask(t, true));
     }
   }
 
@@ -930,6 +1297,11 @@
         toggleBtn.setAttribute("aria-expanded", "false");
       });
     });
+
+    const resetBtn = $("reset-progress-btn");
+    if (resetBtn) resetBtn.addEventListener("click", resetWebsiteSecretsAndProgress);
+    const vResetBtn = $("vault-reset-btn");
+    if (vResetBtn) vResetBtn.addEventListener("click", resetWebsiteSecretsAndProgress);
   }
 
   // ==========================================================================
@@ -941,10 +1313,9 @@
     const status = $("wish-status");
     if (!btn || !visual) return;
 
-    let blown = false;
     btn.addEventListener("click", () => {
-      blown = !blown;
-      if (blown) {
+      candlesBlown = !candlesBlown;
+      if (candlesBlown) {
         visual.classList.add("is-blown");
         btn.textContent = "Relight Birthday Candles";
         status.textContent = "Wish made! Happy Birthday, Kirana!";
@@ -957,6 +1328,7 @@
         status.textContent = "3 glowing candles waiting!";
         window.soundEngine.playFlipSfx();
       }
+      saveSiteProgress();
     });
   }
 
@@ -969,7 +1341,7 @@
     const ctx = canvas.getContext("2d");
 
     let activeColor = "#c77dff";
-    let mode = "draw"; // 'draw' | 'star' | 'paw'
+    let mode = "draw"; // 'draw' | 'star' | 'paw' | 'coffee'
     let drawing = false;
 
     function drawCoasterBase() {
@@ -999,6 +1371,21 @@
     }
 
     drawCoasterBase();
+
+    function saveCoasterArt() {
+      try {
+        localStorage.setItem(COASTER_ART_KEY, canvas.toDataURL("image/png"));
+      } catch (_) {}
+    }
+
+    try {
+      const savedArt = localStorage.getItem(COASTER_ART_KEY);
+      if (savedArt && savedArt.startsWith("data:image/")) {
+        const img = new Image();
+        img.onload = () => ctx.drawImage(img, 0, 0);
+        img.src = savedArt;
+      }
+    } catch (_) {}
 
     function getPos(evt) {
       const rect = canvas.getBoundingClientRect();
@@ -1045,16 +1432,46 @@
       ctx.restore();
     }
 
+    function drawCoffee(x, y, color) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.roundRect(-10, -4, 18, 13, 3);
+      ctx.fill();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.arc(10, 2, 4.2, -Math.PI / 2, Math.PI / 2);
+      ctx.stroke();
+      ctx.lineWidth = 1.8;
+      [-4, 2].forEach((sx) => {
+        ctx.beginPath();
+        ctx.moveTo(sx, -8);
+        ctx.quadraticCurveTo(sx + 2, -12, sx, -15);
+        ctx.stroke();
+      });
+      ctx.restore();
+    }
+
     canvas.addEventListener("pointerdown", (e) => {
       const pos = getPos(e);
       if (mode === "star") {
         drawStar(pos.x, pos.y, activeColor);
         window.soundEngine.playEggSfx();
+        saveCoasterArt();
         return;
       }
       if (mode === "paw") {
         drawPaw(pos.x, pos.y, activeColor);
         window.soundEngine.playEggSfx();
+        saveCoasterArt();
+        return;
+      }
+      if (mode === "coffee") {
+        drawCoffee(pos.x, pos.y, activeColor);
+        window.soundEngine.playEggSfx();
+        saveCoasterArt();
         return;
       }
       drawing = true;
@@ -1074,7 +1491,10 @@
     });
 
     window.addEventListener("pointerup", () => {
-      drawing = false;
+      if (drawing) {
+        drawing = false;
+        saveCoasterArt();
+      }
     });
 
     document.querySelectorAll(".pen-swatch").forEach((sw) => {
@@ -1085,6 +1505,7 @@
         mode = "draw";
         $("pen-mode-star").classList.remove("is-active");
         $("pen-mode-paw").classList.remove("is-active");
+        if ($("pen-mode-coffee")) $("pen-mode-coffee").classList.remove("is-active");
       });
     });
 
@@ -1092,16 +1513,30 @@
       mode = mode === "star" ? "draw" : "star";
       $("pen-mode-star").classList.toggle("is-active", mode === "star");
       $("pen-mode-paw").classList.remove("is-active");
+      if ($("pen-mode-coffee")) $("pen-mode-coffee").classList.remove("is-active");
     });
 
     $("pen-mode-paw").addEventListener("click", () => {
       mode = mode === "paw" ? "draw" : "paw";
       $("pen-mode-paw").classList.toggle("is-active", mode === "paw");
       $("pen-mode-star").classList.remove("is-active");
+      if ($("pen-mode-coffee")) $("pen-mode-coffee").classList.remove("is-active");
     });
+
+    if ($("pen-mode-coffee")) {
+      $("pen-mode-coffee").addEventListener("click", () => {
+        mode = mode === "coffee" ? "draw" : "coffee";
+        $("pen-mode-coffee").classList.toggle("is-active", mode === "coffee");
+        $("pen-mode-star").classList.remove("is-active");
+        $("pen-mode-paw").classList.remove("is-active");
+      });
+    }
 
     $("coaster-clear-btn").addEventListener("click", () => {
       drawCoasterBase();
+      try {
+        localStorage.removeItem(COASTER_ART_KEY);
+      } catch (_) {}
       window.soundEngine.playFlipSfx();
     });
 
@@ -1293,6 +1728,49 @@
   }
 
   // ==========================================================================
+  // 18. 3D INTERACTIVE CARD TILT & SUBTLE DESKTOP SPARKLES
+  // ==========================================================================
+  function setupFancy3DTiltAndSparkles() {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    document.querySelectorAll(".calling-card-poster, .sweet-station-card, .rpg-launch-card").forEach((el) => {
+      el.classList.add("tilt-3d-surface");
+      el.addEventListener("mousemove", (e) => {
+        const rect = el.getBoundingClientRect();
+        const nx = (e.clientX - rect.left) / rect.width - 0.5;
+        const ny = (e.clientY - rect.top) / rect.height - 0.5;
+        el.style.setProperty("--tx", `${(-ny * 7).toFixed(2)}deg`);
+        el.style.setProperty("--ty", `${(nx * 7).toFixed(2)}deg`);
+      });
+      el.addEventListener("mouseleave", () => {
+        el.style.setProperty("--tx", "0deg");
+        el.style.setProperty("--ty", "0deg");
+      });
+    });
+
+    if (window.matchMedia && window.matchMedia("(pointer: fine)").matches) {
+      let lastSparkle = 0;
+      window.addEventListener("mousemove", (e) => {
+        const now = performance.now();
+        if (now - lastSparkle < 95) return;
+        if (document.body.classList.contains("state-locked")) return;
+        lastSparkle = now;
+
+        const sp = document.createElement("span");
+        sp.className = "cursor-sparkle";
+        sp.textContent = Math.random() < 0.5 ? "✦" : "✧";
+        sp.style.left = `${e.clientX}px`;
+        sp.style.top = `${e.clientY}px`;
+        sp.style.color = Math.random() < 0.5 ? "#e9c46a" : "#c77dff";
+        document.body.appendChild(sp);
+        setTimeout(() => sp.remove(), 700);
+      });
+    }
+  }
+
+  // ==========================================================================
   // BOOTSTRAP
   // ==========================================================================
   document.addEventListener("DOMContentLoaded", () => {
@@ -1307,7 +1785,9 @@
     setupCallingCardStamp();
     setupHermitReveal();
     setupEasterEggs();
+    restoreSiteProgress();
     setupRpgFrameOverlay();
     setupFinalLetter();
+    setupFancy3DTiltAndSparkles();
   });
 })();

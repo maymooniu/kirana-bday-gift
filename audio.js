@@ -25,6 +25,9 @@ class SoundEngine {
     this.loopTimer = null;
     this.stepIndex = 0;
     this.noiseNode = null;
+    this.rainSource = null;
+    this.rainAmbienceGain = null;
+    this.isRainAmbienceOn = false;
     this._lastSaveMs = 0;
     this.isEmbeddedChild = (() => {
       try {
@@ -390,6 +393,72 @@ class SoundEngine {
     this.saveBgmState(true);
     this.emitStateChange();
     return this.isPlaying;
+  }
+
+  nextWebsiteTrack() {
+    this.initContext();
+    const list = this.getWebsitePlaylist();
+    if (list.length <= 1) return false;
+    this.websitePlaylistIdx = (this.websitePlaylistIdx + 1) % list.length;
+    const track = list[this.websitePlaylistIdx];
+    this.userPaused = false;
+    this.loadWebsiteTrackElement(track, 0, true, 0);
+    this.saveBgmState(true);
+    return true;
+  }
+
+  toggleRainAmbience() {
+    this.initContext();
+    if (this.isRainAmbienceOn) {
+      if (this.rainAmbienceGain) {
+        this.rainAmbienceGain.gain.setTargetAtTime(0.0001, this.ctx.currentTime, 0.25);
+      }
+      setTimeout(() => {
+        if (!this.isRainAmbienceOn && this.rainSource) {
+          try {
+            this.rainSource.stop();
+          } catch (_) {}
+          this.rainSource = null;
+        }
+      }, 320);
+      this.isRainAmbienceOn = false;
+      return false;
+    }
+
+    const bufferSize = this.ctx.sampleRate * 3;
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    let lastOut = 0;
+    for (let i = 0; i < bufferSize; i++) {
+      const white = Math.random() * 2 - 1;
+      // Soft brown-pink café window rain noise
+      data[i] = (lastOut + 0.045 * white) / 1.045;
+      lastOut = data[i];
+      data[i] *= 2.8;
+    }
+
+    const src = this.ctx.createBufferSource();
+    src.buffer = buffer;
+    src.loop = true;
+
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.value = 950;
+    filter.Q.value = 0.45;
+
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.001, this.ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0.28, this.ctx.currentTime + 0.8);
+
+    src.connect(filter);
+    filter.connect(g);
+    g.connect(this.masterGain);
+    src.start();
+
+    this.rainSource = src;
+    this.rainAmbienceGain = g;
+    this.isRainAmbienceOn = true;
+    return true;
   }
 
   pauseForBattleExternal() {

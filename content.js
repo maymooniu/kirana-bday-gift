@@ -19,11 +19,11 @@ window.SITE_CONTENT = {
     websitePlaylist: [
       {
         url: "./assets/website music/first song.mp3",
-        title: "Velvet Rain Track 1"
+        title: "Rainy Café Side A"
       },
       {
         url: "./assets/website music/second song.mp3",
-        title: "Velvet Rain Track 2"
+        title: "Velvet Night Side B"
       }
     ],
     generalBattleThemes: [
@@ -52,7 +52,7 @@ window.SITE_CONTENT = {
       url: "./assets/boss battle theme/Persona 4 Golden - Ill Face Myself ~ Alternate Battle Ver.mp3",
       title: "I'll Face Myself (Boss Battle)"
     },
-    trackTitle: "Velvet Rain Track 1",
+    trackTitle: "Rainy Café Side A",
     volume: 0.45
   },
 
@@ -416,7 +416,7 @@ window.SITE_CONTENT = {
     ]
   },
 
-  // Act VI: Confidant Rank Up Mini-Interaction
+  // Act VI: Confidant Rank Up Multi-Stage Hangout
   confidant: {
     eyebrow: "SECTION 04 // CONFIDANT EVENT",
     arcanaLabel: "ARCANA III: THE EMPRESS",
@@ -424,6 +424,59 @@ window.SITE_CONTENT = {
     portraitCaption: "CHRIS LE SHIBA",
     promptSpeaker: "Chris le Shiba",
     promptLine: "\"You're too goofy\"",
+    stages: [
+      {
+        prompt: "\"Alright, Blacc Car, quick check before we order choco milk: remember Day 1?\"",
+        choices: [
+          {
+            label: "\"We talked like formal D&D royalty\"",
+            response: "Chris le Shiba laughs: \"Yes!! Full noble titles and stiff greetings until everything suddenly clicked. Peak character development.\""
+          },
+          {
+            label: "\"You were already being weird\"",
+            response: "Chris le Shiba grins: \"Hey, at least my weirdness broke the ice before my Hanoi trip!\""
+          },
+          {
+            label: "\"Please erase my eepy moments\"",
+            response: "Chris le Shiba salutes: \"Deal, only if you erase my eepy schizo Hanoi texts too.\""
+          }
+        ]
+      },
+      {
+        prompt: "\"What about late-night voice calls, doing literally nothing, or streaming games?\"",
+        choices: [
+          {
+            label: "\"Streaming Metaphor: ReFantazio!\"",
+            response: "Chris le Shiba nods enthusiastically: \"Way better sharing the screen with you than playing solo. We still have to finish the rest together!\""
+          },
+          {
+            label: "\"Just being comfortably bored on call\"",
+            response: "Chris le Shiba smiles: \"Zero pressure to perform or impress. Honestly one of my favorite feelings this whole year.\""
+          },
+          {
+            label: "\"Snacking on chocolate and chilling\"",
+            response: "Chris le Shiba cheers: \"Elite combo. +999 Spirit restored for both Blacc Car and Shiba!\""
+          }
+        ]
+      },
+      {
+        prompt: "\"Okay, final boss question: ready for an awesome year ahead, gooberiorioriorioso?\"",
+        choices: [
+          {
+            label: "\"Nuh uh, you're the bigger goober\"",
+            response: "Chris le Shiba laughs: \"Fine, co-presidents of the Goober Council it is. Always in your corner, Kirana!\""
+          },
+          {
+            label: "\"Ready with stylus & choco milk!\"",
+            response: "Chris le Shiba cheers: \"That is the spirit! Let's make this next year iconic, art queen!\""
+          },
+          {
+            label: "\"Only if I get an extra nap first\"",
+            response: "Chris le Shiba grants decree: \"Official Unlimited Nap Pass stamped and approved. Happy Birthday, Kirana!\""
+          }
+        ]
+      }
+    ],
     choices: [
       {
         id: "choice-nuh-uh",
@@ -445,9 +498,9 @@ window.SITE_CONTENT = {
       }
     ],
     rankUpTitle: "CHRIS LE SHIBA: BOND AT MAX",
-    rankUpSubtitle: "You reached MAX Rank with The Empress Confidant! Thanks for bringing good vibes and color back this year.",
+    rankUpSubtitle: "You reached MAX Rank with The Empress Confidant! Thanks for bringing warmth, peace, and color back this year.",
     perkTitle: "CONFIDANT ABILITY UNLOCKED: INFINITE SHIBA SUPPORT",
-    perkDesc: "Grants unlimited choco milk deliveries, endless eepy nap passes, and a loyal shiba cheering you on."
+    perkDesc: "Grants unlimited choco milk deliveries, endless eepy nap passes, cozy quiet calls, and a loyal shiba cheering you on."
   },
 
   // Act VII: Phantom Thief Calling Card Poster
@@ -471,8 +524,32 @@ window.SITE_CONTENT = {
     lanternQuote:
       "\"The Hermit carries a glowing lantern, not to hide from the world, but to light a steady path through the dark for anyone lost in it.\"",
     personalNote:
-      "I know The Hermit is your favorite card, and honestly it fits you so well. When I was really depressed and mentally unstable, everything felt foggy and hard to navigate. You did not have to do anything loud or flashy. Just having you around felt like a quiet, steady lantern holding back the dark until I could find my footing again."
+      "I know The Hermit is your favorite card, and honestly it fits you so well. Back when my head felt heavy and everything seemed stuck in dull gray fog, you did not have to do anything loud or flashy. Just having you around felt like a steady lantern holding back the dark until I found my footing again."
   },
+
+  // Unlocked when all 6 Easter Eggs are discovered
+  secretVault: [
+    {
+      tag: "MEMORY CAPSULE #01",
+      title: "The Formal D&D Royalty Era",
+      text: "Going from stiff, polite RPG-nobility texting all the way to full chaos, sleep calls, and ridiculous inside jokes is still the funniest arc of the year."
+    },
+    {
+      tag: "MEMORY CAPSULE #02",
+      title: "Hanoi Travel Lifelines",
+      text: "Sending random debate tournament photos across cities made a stressful trip feel light. Having someone safe to message changed everything."
+    },
+    {
+      tag: "MEMORY CAPSULE #03",
+      title: "Metaphor: ReFantazio Co-Op Spirit",
+      text: "Streaming the story together turned a great game into an unforgettable memory. Controller & popcorn ready for finishing the rest together!"
+    },
+    {
+      tag: "MEMORY CAPSULE #04",
+      title: "Comfortably Bored Peace",
+      text: "Zero pressure to perform or put on an act. Being quiet together on call and still feeling totally at ease is genuinely rare."
+    }
+  ],
 
   // Hidden Clickable Micro-Surprises (6 Scattered Easter Eggs -> Charges Soul Gem!)
   easterEggs: [
