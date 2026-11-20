@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chronicles of the Purple Café | Kirana's Mini-RPG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@600;700&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500;1,700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="rpg-standalone-body">
+  <div class="grain-overlay" aria-hidden="true"></div>
+  <canvas id="confetti-canvas" class="confetti-canvas" aria-hidden="true"></canvas>
+
+  <!-- Dedicated Top Arcade HUD -->
+  <header class="p5-hud rpg-page-hud" aria-label="RPG Header">
+    <div class="hud-left">
+      <a href="index.html" class="hud-pill hud-back-link">
+        <span>← Back to Birthday Site</span>
+      </a>
+
+      <button id="music-toggle-btn" class="hud-pill hud-music-btn" type="button" title="Play or Pause Music">
+        <span class="eq-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span id="music-track-name" class="track-name">Velvet Rain Track 1</span>
+        <span id="music-state-badge" class="music-badge">TAP TO PLAY</span>
+      </button>
+
+      <div class="hud-pill hud-volume-wrap" title="Volume">
+        <span class="vol-label">VOL</span>
+        <input id="volume-slider" type="range" min="0" max="1" step="0.05" value="0.45" aria-label="Music volume" />
+      </div>
+    </div>
+
+    <div class="rpg-page-title-chip">
+      <span>ARCANA IX // CHRONICLES OF THE PURPLE CAFÉ</span>
+    </div>
+  </header>
+
+  <main class="rpg-page-shell">
+    <div id="rpg-arena-box" class="rpg-arena rpg-arena-full">
+      <!-- Top RPG Status Bar -->
+      <div class="rpg-top-status">
+        <div class="rpg-top-left">
+          <span id="rpg-zone-name" class="rpg-chapter-pill">Zone 1: Café Leblanc Safe Room</span>
+          <span id="rpg-top-hp" class="rpg-hp-pill">HP 145/145 | SP 65/65</span>
+        </div>
+        <div class="rpg-top-right">
+          <span id="rpg-level-pill" class="rpg-level-pill">LV. 1 | 35 COINS</span>
+          <button id="rpg-guide-btn" class="rpg-guide-btn" type="button">GUIDE (G)</button>
+          <button id="rpg-menu-btn" class="rpg-menu-btn" type="button">MENU (M)</button>
+        </div>
+      </div>
+
+      <!-- 1 MORE! Banner -->
+      <div id="rpg-one-more" class="rpg-one-more" hidden>1 MORE!</div>
+
+      <!-- MODE 1: 2D EXPLORATION MAP VIEW -->
+      <div id="rpg-explore-view" class="rpg-explore-view">
+        <div id="explore-quest-pill" class="explore-quest-pill">
+          Quest: Explore Café Leblanc, talk to Morgana &amp; Chris, then head right!
+        </div>
+
+        <div class="explore-canvas-wrap">
+          <canvas id="rpg-explore-canvas" width="640" height="400"></canvas>
+        </div>
+
+        <!-- Always-Visible Quick Controls Strip -->
+        <div class="rpg-controls-legend">
+          <span><strong>WASD / Arrows</strong> Move</span>
+          <span><strong>E / Space / Click</strong> Talk, Open, Save</span>
+          <span><strong>M</strong> Party, Equip &amp; Save</span>
+          <span><strong>G</strong> Full Game Guide</span>
+        </div>
+
+        <div class="explore-bottom-bar">
+          <div id="explore-notice-bar" class="explore-notice-bar">
+            Walk with WASD / Arrow keys, click tiles, or use the pad! Talk to Chris le Shiba &amp; Morgana, then head right!
+          </div>
+
+          <div class="dpad-cluster" aria-label="Touch Controls">
+            <div class="dpad-grid">
+              <span></span>
+              <button id="dpad-up" class="dpad-btn" type="button" aria-label="Move Up">▲</button>
+              <span></span>
+              <button id="dpad-left" class="dpad-btn" type="button" aria-label="Move Left">◀</button>
+              <button id="dpad-down" class="dpad-btn" type="button" aria-label="Move Down">▼</button>
+              <button id="dpad-right" class="dpad-btn" type="button" aria-label="Move Right">▶</button>
+            </div>
+            <button id="dpad-act" class="dpad-act-btn" type="button">ACT / TALK</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODE 2: ANIMATED 60FPS BATTLE VIEW -->
+      <div id="rpg-battle-view" hidden>
+        <div class="battle-canvas-wrap">
+          <canvas id="rpg-battle-canvas" width="640" height="300"></canvas>
+        </div>
+
+        <div id="rpg-telegraph-alert" class="rpg-telegraph-alert" hidden>
+          ⚠ WARNING: ENEMY IS CHARGING A HEAVY ATTACK! USE GUARD OR SOUL SHIELD!
+        </div>
+
+        <div id="rpg-barrier-alert" class="rpg-barrier-alert" hidden>
+          🛡 ENEMY BARRIER ACTIVE! Hit with Purple, Gold, or Rumor skills to SHATTER it for bonus damage + 1 MORE!
+        </div>
+
+        <div class="rpg-battlefield">
+          <!-- Enemy Info -->
+          <div id="rpg-boss-card" class="rpg-unit-card rpg-boss-card">
+            <div class="unit-top-row">
+              <div>
+                <span class="unit-tag boss-tag">SHADOW FOE</span>
+                <h3 id="rpg-boss-name" class="unit-name">The Monochrome Gloom</h3>
+                <p id="rpg-boss-sub" class="unit-sub">Shadow of Grayscale</p>
+              </div>
+              <div id="rpg-boss-weakness" class="weakness-pill">WEAK: ??? (Scan!)</div>
+            </div>
+            <div class="bar-wrap">
+              <div class="bar-label-row">
+                <span>ENEMY HP</span>
+                <span id="boss-hp-text">185 / 185</span>
+              </div>
+              <div class="bar-track">
+                <div id="boss-hp-fill" class="bar-fill boss-hp-fill" style="width: 100%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Party Side -->
+          <div class="rpg-unit-card rpg-party-card">
+            <div class="party-header">
+              <img id="rpg-player-avatar" class="party-avatar" src="./assets/art/art-kirana-self.jpg" alt="Kirana Self Portrait RPG Avatar" />
+              <div class="party-title-col">
+                <span class="unit-tag party-tag">ARCANA IX: THE HERMIT</span>
+                <h3 id="rpg-player-name" class="unit-name">Kirana (Blacc Car)</h3>
+                <p class="unit-sub">Allies: Chris le Shiba &amp; Morgana</p>
+              </div>
+            </div>
+
+            <div class="bar-wrap">
+              <div class="bar-label-row">
+                <span>HP</span>
+                <span id="player-hp-text">145 / 145</span>
+              </div>
+              <div class="bar-track">
+                <div id="player-hp-fill" class="bar-fill player-hp-fill" style="width: 100%"></div>
+              </div>
+            </div>
+
+            <div class="bar-wrap">
+              <div class="bar-label-row">
+                <span>SP</span>
+                <span id="player-sp-text">65 / 65</span>
+              </div>
+              <div class="bar-track">
+                <div id="player-sp-fill" class="bar-fill player-sp-fill" style="width: 100%"></div>
+              </div>
+            </div>
+
+            <div class="bar-wrap">
+              <div class="bar-label-row">
+                <span>X-DRIVE / SOUL GEM</span>
+                <span id="xdrive-text">25%</span>
+              </div>
+              <div class="bar-track">
+                <div id="xdrive-fill" class="bar-fill xdrive-fill" style="width: 25%"></div>
+              </div>
+            </div>
+
+            <div id="rpg-status-pills" class="rpg-status-pills"></div>
+          </div>
+        </div>
+
+        <div id="rpg-log" class="rpg-log" aria-live="polite">
+          Battle start! Choose your action.
+        </div>
+
+        <div id="rpg-actions" class="rpg-actions">
+          <button id="act-strike" class="rpg-btn rpg-btn-purple" type="button" title="0 SP physical attack, builds +18% X-Drive">
+            <strong>Stylus Strike</strong>
+            <span>0 SP Attack (+X-Drive)</span>
+          </button>
+
+          <button id="act-skills" class="rpg-btn rpg-btn-gold" type="button" title="Use Purple, Gold, Rumor, or Shield skills">
+            <strong>Skills</strong>
+            <span>Purple / Purify / Unlocked</span>
+          </button>
+
+          <button id="act-guard" class="rpg-btn rpg-btn-sky" type="button" title="Reduces incoming damage by 72% and recovers +15 SP">
+            <strong>Guard</strong>
+            <span>-72% Dmg &amp; +15 SP</span>
+          </button>
+
+          <button id="act-shiba" class="rpg-btn rpg-btn-pink" type="button" title="Baton pass to Chris: deals dmg, lowers enemy DEF, heals +25 HP">
+            <strong>Shiba Baton Pass</strong>
+            <span>Baton Pass + DEF Down</span>
+          </button>
+
+          <button id="act-scan" class="rpg-btn rpg-btn-sky" type="button" title="Free action: reveals enemy weakness without ending your turn">
+            <strong>Sibyl Scan</strong>
+            <span>Free Weakness Intel</span>
+          </button>
+
+          <button id="act-items" class="rpg-btn rpg-btn-choco" type="button" title="Use Choco Milk, Truffles, Cake, or Coffee">
+            <strong>Bag / Sweets</strong>
+            <span>Choco Milk &amp; Buffs</span>
+          </button>
+
+          <button id="act-xdrive" class="rpg-btn rpg-btn-crimson" type="button" disabled title="Unleash massive combo attack when gauge hits 100%">
+            <strong>X-Drive Finisher</strong>
+            <span>Needs 100% Gauge</span>
+          </button>
+
+          <button id="act-flee" class="rpg-btn rpg-btn-ghost" type="button" title="Escape from normal mob battles (disabled for Bosses)">
+            <strong>Escape</strong>
+            <span>Run from normal mob</span>
+          </button>
+        </div>
+
+        <div id="rpg-subdrawer" class="rpg-subdrawer" hidden>
+          <div class="subdrawer-head">
+            <span id="subdrawer-title">Choose Option</span>
+            <button id="subdrawer-close" class="subdrawer-close" type="button">✕</button>
+          </div>
+          <div id="subdrawer-options" class="subdrawer-options"></div>
+        </div>
+      </div>
+
+      <!-- MODE 3: GOOD ENDING -->
+      <div id="rpg-good-ending-view" class="rpg-ending-view" hidden>
+        <div class="rpg-all-out">
+          <div class="all-out-portrait">
+            <img id="rpg-all-out-img" src="./assets/art/art-kirana-self.jpg" alt="Kirana All Out Attack" />
+          </div>
+          <div class="all-out-text">
+            <span class="all-out-kicker">GOOD ENDING // PALACE CLEARED!</span>
+            <h3 id="rpg-victory-title" class="all-out-title"></h3>
+          </div>
+        </div>
+
+        <div id="rpg-ending-summary" class="rpg-victory-loot">
+          <div class="loot-badge">TRUE BIRTHDAY ENDING UNLOCKED</div>
+          <h3 id="loot-title" class="loot-title"></h3>
+          <p id="loot-desc" class="loot-desc"></p>
+          <div class="ending-stats-grid">
+            <div class="end-stat-box">
+              <small>FINAL RANK</small>
+              <strong id="end-stat-level">Lv. 3</strong>
+            </div>
+            <div class="end-stat-box">
+              <small>TURNS PLAYED</small>
+              <strong id="end-stat-turns">0 Turns</strong>
+            </div>
+            <div class="end-stat-box">
+              <small>FINAL LOADOUT</small>
+              <strong id="end-stat-gear">Gear</strong>
+            </div>
+          </div>
+          <div class="ending-btn-row">
+            <button id="download-pass-btn" class="download-pass-btn" type="button">
+              ★ Claim &amp; Download Pass (.PNG)
+            </button>
+            <button id="rpg-newgame-btn" class="rpg-replay-btn" type="button">
+              ↺ New Game+ (Replay)
+            </button>
+            <a href="index.html" class="rpg-replay-btn rpg-back-site-btn">
+              ← Return to Birthday Site
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODE 4: BAD ENDING -->
+      <div id="rpg-bad-ending-view" class="rpg-bad-ending-view" hidden>
+        <div class="bad-ending-card">
+          <span class="bad-tag">BAD ENDING // THE ENDLESS MONDAY SNOOZE</span>
+          <h3 class="bad-title">The Monochrome Gloom Prevailed...</h3>
+          <p class="bad-desc">
+            Kirana's HP hit zero and the evil alarm clock froze Café Leblanc in a 1,000-year sleepy Monday!
+            Chris le Shiba &amp; Morgana are poking you with a choco milk straw to wake back up.
+          </p>
+          <div class="ending-btn-row">
+            <button id="bad-load-btn" class="download-pass-btn" type="button">
+              ↺ Load Last Save
+            </button>
+            <button id="bad-retry-cafe-btn" class="rpg-replay-btn" type="button">
+              ☕ Wake Up in Café Safe Room (Keep Gear)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- OVERLAY: TYPEWRITER DIALOGUE & CHOICES -->
+      <div id="rpg-dialogue-overlay" class="rpg-overlay-panel" hidden>
+        <div id="rpg-dlg-box" class="vn-box vn-box-overlay">
+          <div id="rpg-dlg-portrait-wrap" class="vn-portrait-wrap">
+            <img id="rpg-dlg-avatar" src="" alt="Speaker Portrait" hidden />
+            <canvas id="rpg-dlg-sprite-portrait" width="108" height="118" hidden></canvas>
+          </div>
+          <div class="vn-dialogue-col">
+            <span id="rpg-dlg-speaker" class="vn-speaker">Narration</span>
+            <p id="rpg-dlg-text" class="vn-text"></p>
+            <div id="rpg-dlg-choices" class="dlg-choices-list" hidden></div>
+            <div class="vn-controls">
+              <span class="vn-tap-hint">Tap box to continue</span>
+              <button id="rpg-dlg-next-btn" class="vn-btn" type="button">Next ▼</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OVERLAY: TABBED PARTY / EQUIP / BAG / SAVE MENU -->
+      <div id="rpg-menu-overlay" class="rpg-overlay-panel" hidden>
+        <div class="rpg-menu-card">
+          <div class="rpg-menu-header">
+            <div class="menu-tabs">
+              <button class="menu-tab-btn is-active" data-tab="status" type="button">Status</button>
+              <button class="menu-tab-btn" data-tab="equip" type="button">Equip</button>
+              <button class="menu-tab-btn" data-tab="bag" type="button">Bag</button>
+              <button class="menu-tab-btn" data-tab="save" type="button">Save / Load</button>
+            </div>
+            <button id="rpg-menu-close" class="subdrawer-close" type="button">✕</button>
+          </div>
+          <div id="rpg-menu-body" class="rpg-menu-body"></div>
+        </div>
+      </div>
+
+      <!-- OVERLAY: DETAILED GAME GUIDE MODAL -->
+      <div id="rpg-guide-overlay" class="rpg-overlay-panel" hidden>
+        <div class="rpg-menu-card">
+          <div class="rpg-menu-header">
+            <div class="menu-tabs">
+              <button class="guide-tab-btn is-active" data-gtab="basics" type="button">Basics &amp; Controls</button>
+              <button class="guide-tab-btn" data-gtab="stats" type="button">Stats</button>
+              <button class="guide-tab-btn" data-gtab="skills" type="button">Skills &amp; Bosses</button>
+              <button class="guide-tab-btn" data-gtab="items" type="button">Items &amp; Gear</button>
+            </div>
+            <button id="rpg-guide-close" class="subdrawer-close" type="button">✕</button>
+          </div>
+          <div id="rpg-guide-body" class="rpg-menu-body"></div>
+        </div>
+      </div>
+
+      <!-- OVERLAY: NON-LINEAR LEVEL UP BUILD PICKER -->
+      <div id="rpg-levelup-modal" class="rpg-overlay-panel" hidden>
+        <div class="rpg-levelup-card">
+          <div class="loot-badge">LEVEL UP! CHOOSE YOUR BUILD</div>
+          <p id="rpg-levelup-sub" class="levelup-sub">Kirana leveled up! Pick a stat growth path:</p>
+          <div class="levelup-grid">
+            <button id="lvl-pick-atk" class="levelup-choice-btn" type="button">
+              <strong>Artist Fury Path</strong>
+              <span>+6 ATK &amp; +5% Crit Chance</span>
+            </button>
+            <button id="lvl-pick-mag" class="levelup-choice-btn" type="button">
+              <strong>Velvet Arcana Path</strong>
+              <span>+8 MAG &amp; +15 Max SP</span>
+            </button>
+            <button id="lvl-pick-tank" class="levelup-choice-btn" type="button">
+              <strong>Cozy Tank Path</strong>
+              <span>+35 Max HP &amp; +3 DEF</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="content.js"></script>
+  <script src="audio.js"></script>
+  <script src="rpg-data.js"></script>
+  <script src="rpg.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Wire HUD music & confetti on standalone RPG page
+      const C = window.SITE_CONTENT;
+      if (C) {
+        const trackEl = document.getElementById("music-track-name");
+        const volEl = document.getElementById("volume-slider");
+        const victoryTitle = document.getElementById("rpg-victory-title");
+        const lootTitle = document.getElementById("loot-title");
+        const lootDesc = document.getElementById("loot-desc");
+        const playerAvatar = document.getElementById("rpg-player-avatar");
+        const allOutImg = document.getElementById("rpg-all-out-img");
+
+        if (trackEl) trackEl.textContent = C.audio.trackTitle;
+        if (volEl) volEl.value = String(C.audio.volume ?? 0.45);
+        if (victoryTitle) victoryTitle.textContent = C.rpg.victoryLoot.title;
+        if (lootTitle) lootTitle.textContent = C.rpg.victoryLoot.rewardTitle;
+        if (lootDesc) lootDesc.textContent = C.rpg.victoryLoot.rewardDesc;
+        if (playerAvatar) playerAvatar.src = C.rpg.player.portrait;
+        if (allOutImg) allOutImg.src = C.rpg.player.portrait;
+      }
+
+      const toggleBtn = document.getElementById("music-toggle-btn");
+      const badgeEl = document.getElementById("music-state-badge");
+      const volSlider = document.getElementById("volume-slider");
+
+      function syncHud(playing) {
+        if (!toggleBtn || !badgeEl) return;
+        if (playing) {
+          toggleBtn.classList.remove("is-paused");
+          badgeEl.textContent = "PLAYING";
+        } else {
+          toggleBtn.classList.add("is-paused");
+          badgeEl.textContent = "PAUSED";
+        }
+      }
+
+      window.soundEngine.onTrackChange = (title) => {
+        const el = document.getElementById("music-track-name");
+        if (el && title) el.textContent = title;
+        syncHud(window.soundEngine.isPlaying || window.soundEngine.isBattlePlaying);
+      };
+
+      if (toggleBtn) {
+        toggleBtn.addEventListener("click", () => {
+          const playing = window.soundEngine.togglePlay();
+          syncHud(playing);
+        });
+      }
+      if (volSlider) {
+        volSlider.addEventListener("input", (e) => {
+          window.soundEngine.setVolume(e.target.value);
+        });
+      }
+
+      // Mark completion for main site Palace Map checklist when RPG cleared
+      window.onRpgCompleted = function () {
+        try {
+          localStorage.setItem("kirana_rpg_completed_v1", "1");
+        } catch (_) {}
+      };
+
+      // Confetti burst helper for Good Ending
+      window.launchBirthdayConfetti = function (count = 110) {
+        const canvas = document.getElementById("confetti-canvas");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const colors = ["#c77dff", "#9d4edd", "#e9c46a", "#f4a261", "#e63946", "#70d6ff"];
+        const pieces = Array.from({ length: count }, () => ({
+          x: Math.random() * canvas.width,
+          y: -20 - Math.random() * 140,
+          w: Math.random() * 8 + 5,
+          h: Math.random() * 6 + 4,
+          vx: (Math.random() - 0.5) * 4.5,
+          vy: Math.random() * 4.2 + 2.6,
+          rot: Math.random() * Math.PI * 2,
+          vrot: (Math.random() - 0.5) * 0.22,
+          color: colors[Math.floor(Math.random() * colors.length)]
+        }));
+        let frame = 0;
+        function step() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          let alive = 0;
+          for (const p of pieces) {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.06;
+            p.rot += p.vrot;
+            if (p.y < canvas.height + 30) alive++;
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rot);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+            ctx.restore();
+          }
+          frame++;
+          if (alive > 0 && frame < 220) {
+            requestAnimationFrame(step);
+          } else {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+          }
+        }
+        requestAnimationFrame(step);
+      };
+
+      if (typeof window.initKiranaRpg === "function") {
+        window.initKiranaRpg();
+      }
+    });
+  </script>
+</body>
+</html>

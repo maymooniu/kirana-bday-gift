@@ -20,6 +20,19 @@
     const C = window.SITE_CONTENT;
     if (!D || !C) return;
 
+    const pNameEl = document.getElementById("rpg-player-name");
+    if (pNameEl) pNameEl.textContent = C.rpg.player.name;
+    const pAvatarEl = document.getElementById("rpg-player-avatar");
+    if (pAvatarEl) pAvatarEl.src = C.rpg.player.portrait;
+    const allOutEl = document.getElementById("rpg-all-out-img");
+    if (allOutEl) allOutEl.src = C.rpg.player.portrait;
+    const vicTitleEl = document.getElementById("rpg-victory-title");
+    if (vicTitleEl) vicTitleEl.textContent = C.rpg.victoryLoot.title;
+    const lootTitleEl = document.getElementById("loot-title");
+    if (lootTitleEl) lootTitleEl.textContent = C.rpg.victoryLoot.rewardTitle;
+    const lootDescEl = document.getElementById("loot-desc");
+    if (lootDescEl) lootDescEl.textContent = C.rpg.victoryLoot.rewardDesc;
+
     // ========================================================================
     // STATE MANAGEMENT
     // ========================================================================
@@ -92,6 +105,7 @@
     let isDialogueOpen = false;
     let isMenuOpen = false;
     let isLevelUpOpen = false;
+    let isGuideOpen = false;
 
     function getMaxHp() {
       return (
@@ -186,28 +200,6 @@
       } catch (_) {
         return false;
       }
-    }
-
-    // ========================================================================
-    // THOUGHT CLOUD (13 SENTINELS)
-    // ========================================================================
-    const tcChips = $("thought-cloud-chips");
-    const tcOut = $("thought-cloud-output");
-    if (tcChips && tcOut) {
-      tcChips.innerHTML = "";
-      C.rpg.thoughtCloud.forEach((item) => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "tc-chip";
-        btn.textContent = item.keyword;
-        btn.addEventListener("click", () => {
-          tcChips.querySelectorAll(".tc-chip").forEach((c) => c.classList.remove("is-active"));
-          btn.classList.add("is-active");
-          window.soundEngine.playScanSfx();
-          tcOut.textContent = item.note;
-        });
-        tcChips.appendChild(btn);
-      });
     }
 
     // ========================================================================
@@ -313,6 +305,73 @@
         ctx.strokeRect(-28, -20, 56, 40);
         ctx.fillStyle = "#e63946";
         ctx.fillRect(-6, -4, 12, 12);
+      } else if (kind === "alarmBoss") {
+        // 6 AM Alarm Drone portrait
+        ctx.fillStyle = "#1d1a26";
+        ctx.strokeStyle = "#a098ad";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, 2, 28, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = "#3c354c";
+        ctx.beginPath();
+        ctx.arc(-20, -22, 10, 0, Math.PI * 2);
+        ctx.arc(20, -22, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#e63946";
+        ctx.fillRect(-13, -4, 8, 6);
+        ctx.fillRect(5, -4, 8, 6);
+        ctx.strokeStyle = "#e9c46a";
+        ctx.beginPath();
+        ctx.moveTo(0, 2);
+        ctx.lineTo(0, -16);
+        ctx.moveTo(0, 2);
+        ctx.lineTo(13, 9);
+        ctx.stroke();
+      } else if (kind === "witchBoss") {
+        // Blank-Canvas Witch portrait
+        ctx.fillStyle = "#221436";
+        ctx.strokeStyle = "#c77dff";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, -36);
+        ctx.lineTo(28, 30);
+        ctx.lineTo(-28, 30);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = "#ff70a6";
+        ctx.beginPath();
+        ctx.arc(0, -4, 11, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#120e1a";
+        ctx.fillRect(-5, -6, 3, 5);
+        ctx.fillRect(2, -6, 3, 5);
+      } else if (kind === "finalBoss") {
+        // Shadow of Doubt & Burnout portrait
+        ctx.strokeStyle = "#e63946";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(0, 0, 34, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = "#0e0a15";
+        ctx.strokeStyle = "#c77dff";
+        ctx.beginPath();
+        ctx.arc(0, 0, 26, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = "#ff2a38";
+        ctx.beginPath();
+        ctx.moveTo(-14, -5);
+        ctx.lineTo(-4, -1);
+        ctx.lineTo(-11, 5);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(14, -5);
+        ctx.lineTo(4, -1);
+        ctx.lineTo(11, 5);
+        ctx.fill();
       } else {
         // Starburst Trophy
         ctx.fillStyle = "#e9c46a";
@@ -517,7 +576,7 @@
     }
 
     function tryMove(dx, dy) {
-      if (gameMode !== "explore" || isDialogueOpen || isMenuOpen || isLevelUpOpen) return;
+      if (gameMode !== "explore" || isDialogueOpen || isMenuOpen || isLevelUpOpen || isGuideOpen) return;
 
       if (dx > 0) state.facing = "right";
       if (dx < 0) state.facing = "left";
@@ -1194,6 +1253,9 @@
         isBoss,
         enemy: template,
         enemyHp: template.maxHp,
+        activeWeaknesses: [...(template.weaknesses || [])],
+        triggeredEvents: [],
+        barrierActive: false,
         weaknessKnown: false,
         telegraphing: false,
         defDownTurns: 0,
@@ -1296,7 +1358,16 @@
 
       const ex = 175 + battle.enemyOffsetX + (battle.telegraphing ? Math.sin(ts * 0.04) * 4 : 0);
       const ey = 135 + Math.sin(ts * 0.005) * 6;
-      drawBattleEnemy(ctx, battle.enemy.spriteType, ex, ey, battle.enemyFlash > 0, battle.telegraphing, ts);
+      drawBattleEnemy(
+        ctx,
+        battle.enemy.spriteType,
+        ex,
+        ey,
+        battle.enemyFlash > 0,
+        battle.telegraphing,
+        battle.barrierActive,
+        ts
+      );
 
       const sx = 525;
       const sy = 152 + Math.sin(ts * 0.006 + 1) * 4;
@@ -1354,9 +1425,29 @@
       ctx.restore();
     }
 
-    function drawBattleEnemy(ctx, type, x, y, flash, telegraph, ts) {
+    function drawBattleEnemy(ctx, type, x, y, flash, telegraph, barrier, ts) {
       ctx.save();
       ctx.translate(x, y);
+
+      if (barrier) {
+        ctx.save();
+        ctx.rotate(-ts * 0.002);
+        ctx.strokeStyle = "rgba(199, 125, 255, 0.9)";
+        ctx.fillStyle = "rgba(157, 78, 221, 0.14)";
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+          const ang = (i * Math.PI) / 3;
+          const rx = Math.cos(ang) * 68;
+          const ry = Math.sin(ang) * 68;
+          if (i === 0) ctx.moveTo(rx, ry);
+          else ctx.lineTo(rx, ry);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
 
       if (telegraph) {
         ctx.strokeStyle = "rgba(230, 57, 70, 0.8)";
@@ -1540,8 +1631,52 @@
       }, 1050);
     }
 
+    function applyBossHpMechanic(ev) {
+      if (!battle || !ev) return;
+      if (ev.mechanic === "barrier") {
+        battle.barrierActive = true;
+        spawnBattleVfx("hit", "enemy", "BARRIER UP!", "#c77dff");
+      } else if (ev.mechanic === "barrier_shift") {
+        battle.barrierActive = true;
+        if (Array.isArray(ev.newWeaknesses) && ev.newWeaknesses.length) {
+          battle.activeWeaknesses = [...ev.newWeaknesses];
+        }
+        spawnBattleVfx("hit", "enemy", "PHASE SHIFT!", "#e9c46a");
+      } else if (ev.mechanic === "courage") {
+        state.hp = Math.min(getMaxHp(), state.hp + 30);
+        state.sp = Math.min(getMaxSp(), state.sp + 30);
+        state.xDrive = Math.min(100, state.xDrive + 35);
+        window.soundEngine.playChimeSfx(true);
+        spawnBattleVfx("heal", "hero", "+30 HP/SP COURAGE!", "#80ed99");
+      } else if (ev.mechanic === "courage_finale") {
+        if (Array.isArray(ev.newWeaknesses) && ev.newWeaknesses.length) {
+          battle.activeWeaknesses = [...ev.newWeaknesses];
+        }
+        state.hp = Math.min(getMaxHp(), state.hp + 50);
+        state.sp = Math.min(getMaxSp(), state.sp + 35);
+        state.xDrive = Math.min(100, state.xDrive + 50);
+        window.soundEngine.playChimeSfx(true);
+        spawnBattleVfx("heal", "hero", "FINALE COURAGE!", "#e9c46a");
+      }
+    }
+
     function damageEnemy(rawDmg, element, weakTrigger) {
       let dmg = rawDmg;
+      let shatteredBarrier = false;
+      let resistedBarrier = false;
+
+      if (battle.barrierActive) {
+        if (element === "phys") {
+          dmg = Math.max(8, Math.round(dmg * 0.45));
+          resistedBarrier = true;
+        } else {
+          battle.barrierActive = false;
+          dmg += 35;
+          shatteredBarrier = true;
+          weakTrigger = true;
+        }
+      }
+
       if (battle.defDownTurns > 0) dmg = Math.round(dmg * 1.25);
       const isCrit = Math.random() < getCrit();
       if (isCrit) dmg = Math.round(dmg * 1.45);
@@ -1551,18 +1686,54 @@
       battle.enemyOffsetX = -18;
       battle.enemyFlash = 10;
       battle.shakeFrames = isCrit || weakTrigger ? 10 : 5;
-      spawnBattleVfx("slash", "enemy", `-${dmg}${isCrit ? "!" : ""}`, weakTrigger ? "#e9c46a" : "#c77dff");
+
+      const labelText = shatteredBarrier
+        ? `SHATTER -${dmg}!`
+        : resistedBarrier
+          ? `RESIST -${dmg}`
+          : `-${dmg}${isCrit ? "!" : ""}`;
+      const labelColor = shatteredBarrier ? "#70d6ff" : resistedBarrier ? "#a098ad" : weakTrigger ? "#e9c46a" : "#c77dff";
+      spawnBattleVfx("slash", "enemy", labelText, labelColor);
 
       if (battle.enemyHp <= 0) {
         handleBattleVictory();
         return "won";
       }
 
-      if (weakTrigger || isCrit) {
-        showOneMoreBanner(weakTrigger ? "WEAK! 1 MORE!" : "CRIT! 1 MORE!");
+      const grantsOneMore = !resistedBarrier && (weakTrigger || isCrit);
+
+      if (battle.isBoss && Array.isArray(battle.enemy.hpEvents)) {
+        const nextIdx = battle.enemy.hpEvents.findIndex(
+          (ev, idx) => !battle.triggeredEvents.includes(idx) && battle.enemyHp <= Math.round(battle.enemy.maxHp * ev.pct)
+        );
+        if (nextIdx !== -1) {
+          const ev = battle.enemy.hpEvents[nextIdx];
+          battle.triggeredEvents.push(nextIdx);
+          applyBossHpMechanic(ev);
+          battle.busy = true;
+          battle.log = shatteredBarrier
+            ? `BARRIER SHATTERED for ${dmg} dmg! ${battle.enemy.name} reacted!`
+            : `${battle.enemy.name} entered a new phase!`;
+          renderHudAndViews();
+          openDialogue(ev.lines, () => {
+            if (!battle) return;
+            battle.busy = false;
+            if (grantsOneMore) {
+              showOneMoreBanner(shatteredBarrier ? "SHATTER! 1 MORE!" : weakTrigger ? "WEAK! 1 MORE!" : "CRIT! 1 MORE!");
+              renderHudAndViews();
+            } else {
+              enemyTurn();
+            }
+          });
+          return "event";
+        }
+      }
+
+      if (grantsOneMore) {
+        showOneMoreBanner(shatteredBarrier ? "SHATTER! 1 MORE!" : weakTrigger ? "WEAK! 1 MORE!" : "CRIT! 1 MORE!");
         return "1more";
       }
-      return "normal";
+      return resistedBarrier ? "resisted" : "normal";
     }
 
     function handleBattleVictory() {
@@ -1764,13 +1935,15 @@
       updateQuestBanner();
 
       if (gameMode === "battle" && battle) {
+        const barrierEl = $("rpg-barrier-alert");
+        if (barrierEl) barrierEl.hidden = !battle.barrierActive;
         $("rpg-telegraph-alert").hidden = !battle.telegraphing;
         $("rpg-boss-name").textContent = battle.enemy.name;
         $("rpg-boss-sub").textContent = battle.enemy.subtitle || "Roaming Shadow";
         $("boss-hp-text").textContent = `${battle.enemyHp} / ${battle.enemy.maxHp}`;
         $("boss-hp-fill").style.width = `${Math.max(0, (battle.enemyHp / battle.enemy.maxHp) * 100)}%`;
         $("rpg-boss-weakness").textContent = battle.weaknessKnown
-          ? `WEAK: ${battle.enemy.weaknesses.join(", ").toUpperCase()}`
+          ? `WEAK: ${battle.activeWeaknesses.join(", ").toUpperCase()}`
           : "WEAK: ??? (Scan!)";
 
         $("player-hp-text").textContent = `${state.hp} / ${maxHp}`;
@@ -1996,9 +2169,169 @@
       }
     });
 
-    const rpgArena = $("rpg-arena-box");
-    rpgArena.addEventListener("keydown", (e) => {
-      if (gameMode !== "explore") return;
+    function openGuideModal(tabName = "basics") {
+      isGuideOpen = true;
+      const overlay = $("rpg-guide-overlay");
+      if (overlay) overlay.hidden = false;
+      renderGuideModal(tabName);
+    }
+
+    function closeGuideModal() {
+      isGuideOpen = false;
+      const overlay = $("rpg-guide-overlay");
+      if (overlay) overlay.hidden = true;
+    }
+
+    function renderGuideModal(tabName) {
+      document.querySelectorAll(".guide-tab-btn").forEach((b) => {
+        b.classList.toggle("is-active", b.dataset.gtab === tabName);
+      });
+      const body = $("rpg-guide-body");
+      if (!body) return;
+
+      if (tabName === "basics") {
+        body.innerHTML = `
+          <div class="guide-grid">
+            <div class="guide-card">
+              <h5>Controls &amp; Shortcuts</h5>
+              <ul>
+                <li><strong>WASD / Arrow Keys:</strong> Move Kirana (or tap the on-screen D-pad).</li>
+                <li><strong>E / Space / Enter:</strong> Talk to NPCs, open Treasure Chests, use Save Crystals, or cross glowing Portals.</li>
+                <li><strong>M:</strong> Open Bag, Gear &amp; Save Menu.</li>
+                <li><strong>G:</strong> Open or close this Game Guide anytime.</li>
+                <li><strong>Esc:</strong> Close open popups cleanly.</li>
+              </ul>
+            </div>
+            <div class="guide-card">
+              <h5>Combat &amp; Boss Flow</h5>
+              <ul>
+                <li><strong>Sibyl Scan (Free Action):</strong> Reveals an enemy's Elemental Weaknesses without spending your turn.</li>
+                <li><strong>WEAK -> 1 MORE!:</strong> Hitting a Weakness or landing a Critical Hit grants an immediate extra turn!</li>
+                <li><strong>Purple/Gold Barriers:</strong> Bosses raise elemental barriers mid-fight. Physical hits deal half damage, while ANY elemental Skill (Pantone Slash, Rumor, Royal Slash, Shiba) <strong>SHATTERS</strong> the barrier for bonus damage + 1 MORE!</li>
+                <li><strong>Telegraph Warning:</strong> When a boss charges a heavy Wipeout strike, use <strong>Guard</strong> or <strong>Soul Gem Purify</strong> to soak it cleanly.</li>
+              </ul>
+            </div>
+          </div>`;
+      } else if (tabName === "stats") {
+        body.innerHTML = `
+          <div class="guide-grid">
+            <div class="guide-card">
+              <h5>Core Combat Stats</h5>
+              <ul>
+                <li><strong>HP (Health Points):</strong> Hits 0 triggers the Bad Ending, with an instant retry back at Cafe Leblanc keeping your gear &amp; level.</li>
+                <li><strong>SP (Soul Points):</strong> Spent to cast Skills. Recover +15 SP whenever you Guard, or use Velvet Dark Truffle / Choco Milk.</li>
+                <li><strong>ATK (Attack Power):</strong> Boosts normal Stylus Strikes, Morgana's Miracle Punch, and Shiba Baton Pass damage.</li>
+                <li><strong>MAG (Magic Power):</strong> Boosts Pantone Slash, Persona 2 Rumors, and Metaphor: Royal Slash.</li>
+                <li><strong>DEF &amp; CRIT%:</strong> DEF lowers incoming hits; CRIT% increases critical chance (crits also grant 1 MORE!).</li>
+                <li><strong>X-Drive Gauge:</strong> Fills from actions. At 100%, unleashes Kirana &amp; Shiba's Eclipse Finisher!</li>
+              </ul>
+            </div>
+            <div class="guide-card">
+              <h5>Level-Up Build Paths</h5>
+              <ul>
+                <li><strong>Illustrator Path (+ATK / +CRIT%):</strong> Best for steady free Stylus Strikes and frequent Crit 1 MORE chains.</li>
+                <li><strong>Arcane Artist (+MAG / +Max SP):</strong> Best for melting bosses with Pantone Slash, Rumor, and Royal Slash.</li>
+                <li><strong>Palette Guardian (+Max HP / +DEF):</strong> Best for relaxing tankiness through long emotional boss phases.</li>
+              </ul>
+            </div>
+          </div>`;
+      } else if (tabName === "skills") {
+        const skillRows = Object.values(D.SKILLS)
+          .map((sk) => {
+            const unlocked = state.unlockedSkills.includes(sk.id);
+            return `<li><strong>${sk.name}</strong> (${sk.cost} SP | ${sk.type.toUpperCase()}) ${unlocked ? "[Unlocked]" : "[Find in Story]"}: ${sk.desc}</li>`;
+          })
+          .join("");
+        body.innerHTML = `
+          <div class="guide-grid">
+            <div class="guide-card">
+              <h5>Kirana's Skills</h5>
+              <ul>${skillRows}</ul>
+            </div>
+            <div class="guide-card">
+              <h5>Special Battle Commands</h5>
+              <ul>
+                <li><strong>Stylus Strike:</strong> Free physical hit (+18% X-Drive). Triggers 1 MORE if weak to PHYS or Crit.</li>
+                <li><strong>Shiba Baton Pass (2t CD):</strong> Chris le Shiba deals Shiba-type damage, applies 3-turn DEF Down to the boss, and heals +25 HP!</li>
+                <li><strong>Guard:</strong> Cuts incoming turn damage by 72%, grants +15 SP and +15% X-Drive.</li>
+                <li><strong>Boss Emotional Phases:</strong> Bosses speak at HP thresholds, trigger Courage Boosts (+HP/SP/X-Drive heals from allies), or shift weaknesses!</li>
+              </ul>
+            </div>
+          </div>`;
+      } else if (tabName === "items") {
+        const consHtml = Object.values(D.CONSUMABLES)
+          .map((it) => `<li><strong>${it.name}</strong> (${it.price} Coins, Owned: ${state.inventory[it.id] || 0}): ${it.desc}</li>`)
+          .join("");
+        const gearHtml = [
+          ...Object.values(D.WEAPONS).map((g) => `<li><strong>[Weapon] ${g.name}</strong>: ${g.desc}</li>`),
+          ...Object.values(D.OUTFITS).map((g) => `<li><strong>[Outfit] ${g.name}</strong>: ${g.desc}</li>`),
+          ...Object.values(D.ACCESSORIES).map((g) => `<li><strong>[Accessory] ${g.name}</strong>: ${g.desc}</li>`)
+        ].join("");
+        body.innerHTML = `
+          <div class="guide-grid">
+            <div class="guide-card">
+              <h5>Consumables</h5>
+              <ul>${consHtml}</ul>
+            </div>
+            <div class="guide-card">
+              <h5>Weapons, Outfits &amp; Accessories</h5>
+              <ul>${gearHtml}</ul>
+            </div>
+          </div>`;
+      }
+    }
+
+    const rpgGuideBtn = $("rpg-guide-btn");
+    if (rpgGuideBtn) rpgGuideBtn.addEventListener("click", () => openGuideModal("basics"));
+    const rpgGuideClose = $("rpg-guide-close");
+    if (rpgGuideClose) rpgGuideClose.addEventListener("click", closeGuideModal);
+    document.querySelectorAll(".guide-tab-btn").forEach((b) => {
+      b.addEventListener("click", () => renderGuideModal(b.dataset.gtab));
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+
+      if (e.key === "Escape") {
+        if (isGuideOpen) {
+          closeGuideModal();
+          return;
+        }
+        if (isMenuOpen) {
+          isMenuOpen = false;
+          $("rpg-menu-overlay").hidden = true;
+          return;
+        }
+        const subdrawer = $("rpg-subdrawer");
+        if (subdrawer && !subdrawer.hidden) {
+          subdrawer.hidden = true;
+          return;
+        }
+      }
+
+      if (e.key === "g" || e.key === "G") {
+        e.preventDefault();
+        isGuideOpen ? closeGuideModal() : openGuideModal("basics");
+        return;
+      }
+
+      if (e.key === "m" || e.key === "M") {
+        if (isGuideOpen) closeGuideModal();
+        if (gameMode === "explore" && !isDialogueOpen && !isLevelUpOpen) {
+          e.preventDefault();
+          isMenuOpen ? (($("rpg-menu-overlay").hidden = true), (isMenuOpen = false)) : openPauseMenu("status");
+        }
+        return;
+      }
+
+      if (isDialogueOpen && (e.key === "Enter" || e.key === " " || e.key === "e" || e.key === "E")) {
+        e.preventDefault();
+        $("rpg-dlg-next-btn").click();
+        return;
+      }
+
+      if (gameMode !== "explore" || isDialogueOpen || isMenuOpen || isLevelUpOpen || isGuideOpen) return;
+
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key)) {
         e.preventDefault();
       }
@@ -2007,14 +2340,7 @@
       if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") tryMove(-1, 0);
       if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") tryMove(1, 0);
       if (e.key === "Enter" || e.key === " " || e.key === "e" || e.key === "E") {
-        if (isDialogueOpen) {
-          $("rpg-dlg-next-btn").click();
-        } else {
-          interactFacingOrAdjacent();
-        }
-      }
-      if (e.key === "m" || e.key === "M") {
-        isMenuOpen ? (($("rpg-menu-overlay").hidden = true), (isMenuOpen = false)) : openPauseMenu("status");
+        interactFacingOrAdjacent();
       }
     });
 
@@ -2065,12 +2391,15 @@
       const dmg = Math.round(getAtk() * mult) + Math.floor(Math.random() * 6);
       state.xDrive = Math.min(100, state.xDrive + 18);
       window.soundEngine.playFlipSfx();
-      const weak = battle.enemy.weaknesses.includes("phys");
+      const weak = battle.activeWeaknesses.includes("phys");
       const res = damageEnemy(dmg, "phys", weak);
-      if (res === "won") return;
+      if (res === "won" || res === "event") return;
       if (res === "1more") {
         battle.log = `Stylus Strike hit for ${dmg} dmg! 1 MORE!`;
         renderHudAndViews();
+      } else if (res === "resisted") {
+        battle.log = `Barrier resisted physical strike (${dmg} dmg)! Use a Magic/Skill to shatter it!`;
+        enemyTurn();
       } else {
         battle.log = `Kirana struck with Stylus Strike for ${dmg} dmg (+18% X-Drive).`;
         enemyTurn();
@@ -2137,11 +2466,11 @@
               spawnBattleVfx("heal", "hero", "+25 HP", "#80ed99");
             }
 
-            const hitsWeak = battle.enemy.weaknesses.includes(sk.type);
+            const hitsWeak = battle.activeWeaknesses.includes(sk.type);
             const res = damageEnemy(dmg, sk.type, hitsWeak);
-            if (res === "won") return;
+            if (res === "won" || res === "event") return;
             if (res === "1more") {
-              battle.log = `WEAKNESS HIT! ${sk.name} dealt ${dmg} dmg! 1 MORE!`;
+              battle.log = `WEAKNESS / SHATTER HIT! ${sk.name} dealt ${dmg} dmg! 1 MORE!`;
               renderHudAndViews();
             } else {
               battle.log = `${sk.name} dealt ${dmg} dmg!`;
@@ -2159,9 +2488,9 @@
       state.xDrive = Math.min(100, state.xDrive + 25);
       window.soundEngine.playChimeSfx(false);
       const dmg = Math.round(getMag() * 1.15);
-      const hitsWeak = battle.enemy.weaknesses.includes("rumor");
+      const hitsWeak = battle.activeWeaknesses.includes("rumor");
       const res = damageEnemy(dmg, "rumor", hitsWeak);
-      if (res === "won") return;
+      if (res === "won" || res === "event") return;
       if (res === "1more") {
         battle.log = `${msg} (${dmg} Reality Shock! 1 MORE!)`;
         renderHudAndViews();
@@ -2192,9 +2521,9 @@
       state.hp = Math.min(getMaxHp(), state.hp + 25);
       state.xDrive = Math.min(100, state.xDrive + 20);
       window.soundEngine.playOneMoreSfx();
-      const hitsWeak = battle.enemy.weaknesses.includes("shiba");
+      const hitsWeak = battle.activeWeaknesses.includes("shiba");
       const res = damageEnemy(dmg, "shiba", hitsWeak);
-      if (res === "won") return;
+      if (res === "won" || res === "event") return;
       battle.log = `Baton Pass to Chris le Shiba! Dealt ${dmg} dmg, lowered Enemy DEF, & healed +25 HP!`;
       if (res === "1more") {
         renderHudAndViews();
@@ -2260,9 +2589,13 @@
       const dmg = Math.round((getAtk() + getMag()) * 1.85) + 40;
       window.soundEngine.playSlashSfx();
       const res = damageEnemy(dmg, "purple", false);
-      if (res === "won") return;
+      if (res === "won" || res === "event") return;
       battle.log = `TOKYO XANADU X-DRIVE! Kirana & Shiba unleashed ${dmg} dmg!`;
-      enemyTurn();
+      if (res === "1more") {
+        renderHudAndViews();
+      } else {
+        enemyTurn();
+      }
     });
 
     $("act-flee").addEventListener("click", () => {
@@ -2322,7 +2655,7 @@
 
     function loop(ts) {
       if (gameMode === "explore") {
-        if (!isDialogueOpen && !isMenuOpen && !isLevelUpOpen && ts - mobMoveTimer > 950) {
+        if (!isDialogueOpen && !isMenuOpen && !isLevelUpOpen && !isGuideOpen && ts - mobMoveTimer > 950) {
           mobMoveTimer = ts;
           activeMobs.forEach((m) => {
             if (m.isBoss) return;

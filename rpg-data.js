@@ -230,39 +230,177 @@ window.RPG_DATA = {
       name: "6 AM Alarm Drone",
       subtitle: "Chapter 1 Guardian",
       spriteType: "alarmBoss",
-      maxHp: 185,
-      atk: 20,
+      maxHp: 340,
+      atk: 16,
       weaknesses: ["purple", "shiba"],
-      exp: 70,
-      coins: 80,
+      exp: 75,
+      coins: 85,
       dropItem: "shortcake",
-      scan: "Sibyl Hue: Loud Morning Gray. Weak to Purple Art & Shiba Baton Pass!"
+      scan: "Sibyl Hue: Loud Morning Gray. Weak to Purple Art & Shiba Baton Pass!",
+      hpEvents: [
+        {
+          pct: 0.65,
+          lines: [
+            {
+              speaker: "6 AM Alarm Drone",
+              spritePortrait: "alarmBoss",
+              text: "*BEEP BEEP BEEP* Sleep is inefficient! Return to dull gray schedules immediately!"
+            },
+            {
+              speaker: "Kirana (Blacc Car)",
+              avatar: "./assets/art/art-kirana-self.jpg",
+              text: "Nope! Today is officially a guilt free nap day. Shiba, hit the snooze button with me!"
+            }
+          ]
+        },
+        {
+          pct: 0.3,
+          mechanic: "barrier",
+          lines: [
+            {
+              speaker: "6 AM Alarm Drone",
+              spritePortrait: "alarmBoss",
+              text: "Activating Snooze Proof Armor! Physical strikes will bounce right off!"
+            },
+            {
+              speaker: "Chris le Shiba",
+              avatar: "./assets/art/art-shiba-boy.jpg",
+              text: "Hit that armor with Purple Skills like Pantone Slash to shatter it!"
+            }
+          ]
+        }
+      ]
     },
     witchBoss: {
       id: "witchBoss",
       name: "Artblock Labyrinth Witch",
       subtitle: "Chapter 2 Guardian",
       spriteType: "witchBoss",
-      maxHp: 270,
-      atk: 26,
+      maxHp: 520,
+      atk: 21,
       weaknesses: ["purple", "rumor"],
-      exp: 105,
-      coins: 120,
+      exp: 115,
+      coins: 130,
       dropItem: "shortcake",
-      scan: "Sibyl Hue: Muddy Eraser Dust. Weak to Purple & Persona 2 Rumors! Telegraphs big hits."
+      scan: "Sibyl Hue: Muddy Eraser Dust. Weak to Purple & Persona 2 Rumors! Watch for Eraser Barriers.",
+      hpEvents: [
+        {
+          pct: 0.72,
+          lines: [
+            {
+              speaker: "Artblock Labyrinth Witch",
+              spritePortrait: "witchBoss",
+              text: "Why keep drawing? Every blank canvas looks intimidating, and every deadline feels impossible..."
+            },
+            {
+              speaker: "Kirana (Blacc Car)",
+              avatar: "./assets/art/art-kirana-self.jpg",
+              text: "Every sketch starts messy! That does not mean you stop creating the things you love."
+            }
+          ]
+        },
+        {
+          pct: 0.45,
+          mechanic: "barrier",
+          lines: [
+            {
+              speaker: "Artblock Labyrinth Witch",
+              spritePortrait: "witchBoss",
+              text: "I will tangle your inspiration in Grayscale Layers! Try breaking through this Eraser Barrier!"
+            },
+            {
+              speaker: "Morgana",
+              spritePortrait: "morgana",
+              text: "Use Pantone Slash or Spread Rumor to shatter the Witch's barrier and steal another 1 MORE!"
+            }
+          ]
+        },
+        {
+          pct: 0.2,
+          mechanic: "courage",
+          lines: [
+            {
+              speaker: "Chris le Shiba",
+              avatar: "./assets/art/art-shiba-boy.jpg",
+              text: "Look at how far you already got, Blacc Car! Here, catch an inspiration boost (+30 HP/SP & +35% X-Drive)!"
+            }
+          ]
+        }
+      ]
     },
     finalBoss: {
       id: "finalBoss",
       name: "The Monochrome Gloom",
       subtitle: "Ruler of the Grayscale Palace",
       spriteType: "finalBoss",
-      maxHp: 390,
-      atk: 31,
+      maxHp: 820,
+      atk: 24,
       weaknesses: ["purple", "rumor", "gold"],
-      exp: 200,
-      coins: 250,
+      exp: 240,
+      coins: 300,
       dropItem: "shortcake",
-      scan: "Sibyl Hue: Pitch Static Void. Weak to Purple, Rumors & Metaphor Gold! Watch for Static Wipeout!"
+      scan: "Sibyl Hue: Pitch Static Void. Weak to Purple, Rumors & Metaphor Gold! Shifts barriers across phases.",
+      hpEvents: [
+        {
+          pct: 0.75,
+          lines: [
+            {
+              speaker: "The Monochrome Gloom",
+              spritePortrait: "finalBoss",
+              text: "Why resist the gray? When everything is faded and numb, nothing can hurt or overwhelm you anymore."
+            },
+            {
+              speaker: "Chris le Shiba",
+              avatar: "./assets/art/art-shiba-boy.jpg",
+              text: "I used to feel trapped in that exact static too. Everything felt heavy and flat, like nothing mattered."
+            },
+            {
+              speaker: "Kirana (Blacc Car)",
+              avatar: "./assets/art/art-kirana-self.jpg",
+              text: "Being numb is not peace. Even on messy rainy nights, the little bright moments are worth sticking around for."
+            }
+          ]
+        },
+        {
+          pct: 0.48,
+          mechanic: "barrier_shift",
+          newWeaknesses: ["gold", "rumor"],
+          lines: [
+            {
+              speaker: "The Monochrome Gloom",
+              spritePortrait: "finalBoss",
+              text: "Then endure my Grayscale Eclipse! I will seal your Purple ink and shift my weakness away!"
+            },
+            {
+              speaker: "Seeker Fairy",
+              spritePortrait: "fairy",
+              text: "Its Eclipse Barrier formed and its weakness shifted to Metaphor Gold & Persona 2 Rumors! Shatter the barrier with a skill!"
+            }
+          ]
+        },
+        {
+          pct: 0.2,
+          mechanic: "courage_finale",
+          newWeaknesses: ["purple", "gold", "rumor", "shiba"],
+          lines: [
+            {
+              speaker: "The Monochrome Gloom",
+              spritePortrait: "finalBoss",
+              text: "Impossible... even inside the deepest fog, your light refuses to go out!"
+            },
+            {
+              speaker: "Chris le Shiba",
+              avatar: "./assets/art/art-shiba-boy.jpg",
+              text: "Because you were that steady lantern for people when things got dark! Morgana, Kirana, let's finish this together!"
+            },
+            {
+              speaker: "Morgana",
+              spritePortrait: "morgana",
+              text: "All weaknesses exposed! Take +50 HP, +35 SP, and +50% X-Drive! Finish it with your brightest Purple & Gold!"
+            }
+          ]
+        }
+      ]
     }
   },
 

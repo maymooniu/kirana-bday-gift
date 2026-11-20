@@ -3627,6 +3627,266 @@ body.state-locked {
 }
 
 /* ============================================================================
+   STANDALONE RPG PAGE & INDEX RPG PORTAL CARD
+   ============================================================================ */
+.rpg-standalone-body {
+  min-height: 100vh;
+  background: radial-gradient(circle at top center, #261642 0%, #120d1d 55%, #090610 100%);
+  padding-bottom: 2.5rem;
+}
+
+.rpg-page-hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  padding: 0.9rem 1.4rem;
+  background: rgba(17, 13, 27, 0.92);
+  border-bottom: 2.5px solid var(--purple-soft);
+}
+
+.hud-back-link,
+.rpg-back-site-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.48rem 0.92rem;
+  background: var(--purple-deep);
+  color: var(--text-main);
+  border: 2px solid var(--purple-soft);
+  box-shadow: 3px 3px 0 var(--ink-dark);
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.14s ease, background 0.14s ease;
+}
+
+.hud-back-link:hover,
+.rpg-back-site-btn:hover {
+  transform: translate(-1px, -1px);
+  background: var(--purple-main);
+}
+
+.rpg-page-title-chip {
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--cafe-gold);
+  background: rgba(233, 196, 106, 0.12);
+  border: 1.5px solid rgba(233, 196, 106, 0.55);
+  padding: 0.35rem 0.85rem;
+}
+
+.rpg-page-shell {
+  max-width: 1120px;
+  margin: 1.25rem auto 0;
+  padding: 0 1rem;
+}
+
+.rpg-arena-full {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 1.35rem;
+}
+
+.rpg-arena-full .explore-canvas-wrap canvas,
+.rpg-arena-full .battle-canvas-wrap canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+
+.rpg-guide-btn {
+  padding: 0.36rem 0.78rem;
+  background: var(--cafe-gold);
+  color: var(--ink-dark);
+  border: 2px solid var(--ink-dark);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--ink-dark);
+}
+
+.rpg-guide-btn:hover {
+  background: #ffd166;
+}
+
+.rpg-controls-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1.15rem;
+  padding: 0.55rem 0.85rem;
+  margin-bottom: 0.8rem;
+  background: rgba(199, 125, 255, 0.09);
+  border: 1.5px solid rgba(199, 125, 255, 0.35);
+  font-size: 0.8rem;
+  color: var(--purple-pale);
+}
+
+.rpg-controls-legend kbd,
+.rpg-launch-features kbd {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  background: #24193c;
+  color: var(--cafe-gold);
+  border: 1px solid var(--purple-soft);
+  border-radius: 3px;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.rpg-barrier-alert {
+  margin-bottom: 0.75rem;
+  padding: 0.58rem 0.9rem;
+  background: rgba(157, 78, 221, 0.25);
+  border: 2px solid var(--purple-soft);
+  color: #f3e5ff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.guide-tab-btn {
+  padding: 0.42rem 0.78rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+  border: 1.5px solid rgba(199, 125, 255, 0.35);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.guide-tab-btn.is-active {
+  background: var(--purple-main);
+  color: #fff;
+  border-color: var(--cafe-gold);
+}
+
+.guide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.95rem;
+}
+
+.guide-card {
+  background: rgba(15, 11, 24, 0.85);
+  border: 2px solid rgba(199, 125, 255, 0.35);
+  padding: 0.9rem 1rem;
+}
+
+.guide-card h5 {
+  margin: 0 0 0.55rem;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--cafe-gold);
+}
+
+.guide-card ul {
+  margin: 0;
+  padding-left: 1.15rem;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--purple-pale);
+}
+
+.guide-card li + li {
+  margin-top: 0.38rem;
+}
+
+/* Index Page RPG Portal Card */
+.rpg-launch-card {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 1.45rem;
+  background: linear-gradient(135deg, rgba(31, 21, 49, 0.95), rgba(18, 13, 29, 0.98));
+  border: 3px solid var(--purple-soft);
+  box-shadow: 8px 8px 0 var(--ink-dark);
+}
+
+.rpg-launch-media {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.rpg-launch-portrait {
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border: 3px solid var(--cafe-gold);
+  box-shadow: 5px 5px 0 var(--ink-dark);
+}
+
+.rpg-launch-status {
+  display: inline-block;
+  padding: 0.28rem 0.65rem;
+  background: rgba(112, 214, 255, 0.14);
+  border: 1.5px solid var(--velvet-sky);
+  color: var(--velvet-sky);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.rpg-launch-status.is-cleared {
+  background: rgba(128, 237, 153, 0.16);
+  border-color: #80ed99;
+  color: #80ed99;
+}
+
+.rpg-launch-headline {
+  margin: 0.55rem 0 0.45rem;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  color: var(--text-main);
+}
+
+.rpg-launch-desc {
+  margin: 0 0 0.75rem;
+  font-size: 0.94rem;
+  line-height: 1.55;
+  color: var(--purple-pale);
+}
+
+.rpg-launch-features {
+  margin: 0 0 1.05rem;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.87rem;
+  color: var(--cafe-gold);
+}
+
+.rpg-launch-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+@media (max-width: 760px) {
+  .rpg-launch-card {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .rpg-launch-actions {
+    justify-content: center;
+  }
+}
+
+/* ============================================================================
    RESPONSIVE ADJUSTMENTS
    ============================================================================ */
 @media (max-width: 860px) {

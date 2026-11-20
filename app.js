@@ -241,8 +241,22 @@
     const slashOverlay = $("slash-transition");
     const mainExperience = $("main-experience");
 
+    try {
+      if (sessionStorage.getItem("kirana_unwrapped") === "1") {
+        entryScreen.classList.add("is-hidden");
+        mainExperience.hidden = false;
+        document.body.classList.remove("state-locked");
+        updateMusicHUD(false);
+        initRainCanvas();
+        observeReveals();
+      }
+    } catch (_) {}
+
     unwrapBtn.addEventListener("click", () => {
       unwrapBtn.disabled = true;
+      try {
+        sessionStorage.setItem("kirana_unwrapped", "1");
+      } catch (_) {}
       // Unlock audio synchronously inside click gesture for mobile Safari/Chrome
       if (typeof window.soundEngine.prepareBGMOnGesture === "function") {
         window.soundEngine.prepareBGMOnGesture();
@@ -276,6 +290,9 @@
     });
 
     $("rewrap-btn").addEventListener("click", () => {
+      try {
+        sessionStorage.removeItem("kirana_unwrapped");
+      } catch (_) {}
       window.soundEngine.stopSongPreview(false);
       window.soundEngine.stopBattleMusic(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -543,20 +560,19 @@
   }
 
   // ==========================================================================
-  // 5C. INTERACTIVE MINI-JRPG ("CHRONICLES OF THE PURPLE CAFE")
+  // 5C. INTERACTIVE MINI-JRPG PORTAL STATUS
   // ==========================================================================
   function initMiniRpg() {
-    const R = C.rpg;
-    $("rpg-player-name").textContent = R.player.name;
-    $("rpg-player-avatar").src = R.player.portrait;
-    $("rpg-all-out-img").src = R.player.portrait;
-    $("rpg-victory-title").textContent = R.victoryLoot.title;
-    $("loot-title").textContent = R.victoryLoot.rewardTitle;
-    $("loot-desc").textContent = R.victoryLoot.rewardDesc;
-
-    if (typeof window.initKiranaRpg === "function") {
-      window.initKiranaRpg();
-    }
+    try {
+      if (localStorage.getItem("kirana_rpg_completed_v1") === "1") {
+        markCompletionTask("rpg");
+        const statusEl = $("rpg-launch-status");
+        if (statusEl) {
+          statusEl.textContent = "STATUS: PALACE CLEARED ★";
+          statusEl.classList.add("is-cleared");
+        }
+      }
+    } catch (_) {}
   }
 
   // ==========================================================================
